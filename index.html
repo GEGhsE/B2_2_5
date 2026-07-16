@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>시계 요정의 하루</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;touch-action:none}
+body{font-family:'Jua','Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#eff6ff;user-select:none;display:flex;align-items:center;justify-content:center}
+/* ── SCALE 반응형: 기준 1024×768 (태블릿) ── */
+.scale-wrap{display:flex;align-items:center;justify-content:center}
+.scale-root{width:1024px;height:768px;flex-shrink:0;transform-origin:center center}
+.app{width:1024px;height:768px;background:#fff;border-radius:32px;box-shadow:0 12px 40px rgba(0,0,0,.08);display:flex;flex-direction:column;position:relative;overflow:hidden}
+
+/* ── GLOBAL HEADER ── */
+#g-header{flex-shrink:0;background:#fff;border-bottom:1.5px solid #f1f5f9;padding:10px 18px 0}
+#g-header.hidden-hdr{display:none}
+.hdr-row1{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.btn-home{background:#f1f5f9;border:none;width:54px;height:54px;border-radius:10px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.btn-home:hover{background:#e0e7ff}
+.hdr-steps{display:flex;align-items:center;gap:6px;flex:1}
+.hdr-step{display:flex;align-items:center;gap:6px;padding:8px 20px;border-radius:999px;font-size:1.15rem;font-weight:700;border:1.5px solid transparent;cursor:default;transition:all .2s;white-space:nowrap}
+.hdr-step.inactive{background:#f8fafc;color:#cbd5e1;border-color:#f1f5f9}
+.hdr-step.active{color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.hdr-step.done{border-color:currentColor;background:#f8fafc}
+.step-num{font-size:1.05rem;font-weight:900;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-step.active .step-num{background:rgba(255,255,255,.3)}
+.hdr-step.done .step-num{background:currentColor;color:#fff}
+.hdr-step.inactive .step-num{background:#e2e8f0;color:#94a3b8}
+.hdr-sep{width:14px;height:2px;border-radius:2px;background:#e2e8f0;flex-shrink:0}
+.hdr-student{font-size:1.2rem;font-weight:700;color:#475569;background:#f8fafc;padding:5px 12px;border-radius:999px;border:1.5px solid #e2e8f0;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+/* progress bar row */
+.hdr-row2{height:5px;background:#f1f5f9;border-radius:999px;margin-bottom:0;overflow:hidden}
+.hdr-progress-fill{height:100%;border-radius:999px;transition:width .4s cubic-bezier(.4,0,.2,1),background .3s}
+
+/* ── SCREENS ── */
+.screen{display:none;flex:1;width:100%;flex-direction:column;overflow:hidden;min-height:0}
+.screen.active{display:flex}
+
+/* ── START ── */
+#s-start{padding:0;gap:0}
+.fairy{animation:bob 2.5s ease-in-out infinite;display:flex;align-items:center;justify-content:center;width:200px;height:250px}
+.fairy svg{width:200px;height:250px}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.fairy-sm{display:inline-flex;align-items:center;vertical-align:middle;width:40px;height:50px}
+.fairy-sm svg{width:40px;height:50px;vertical-align:middle}
+.badge{background:#eef2ff;color:#4f46e5;font-weight:700;font-size:.82rem;padding:5px 18px;border-radius:999px;border:1.5px solid #c7d2fe}
+#s-start h1{font-size:2.2rem;font-weight:900;color:#4f46e5;line-height:1.2}
+.promise{background:#f8fafc;border-radius:18px;padding:20px 28px;border:1.5px solid #e0e7ff;max-width:380px}
+.promise p{font-size:1.1rem;font-weight:700;color:#374151;line-height:1.7}
+.btn-xl{background:#4f46e5;color:#fff;font-size:1.15rem;font-weight:900;padding:16px 52px;border-radius:18px;border:none;cursor:pointer;box-shadow:0 6px 0 #3730a3;transition:transform .1s,box-shadow .1s;font-family:inherit}
+.btn-xl:active{transform:translateY(4px);box-shadow:0 2px 0 #3730a3}
+
+/* ── STUDENT ── */
+#s-student{align-items:center;justify-content:center;padding:24px;gap:18px}
+.sel-box{background:#fff;border-radius:24px;border:2px solid #e0e7ff;padding:36px 44px;width:720px;display:flex;flex-direction:column;gap:20px}
+select{width:100%;height:72px;padding:0 22px;border:3px solid #c7d2fe;border-radius:16px;font-size:1.7rem;font-weight:700;color:#1e293b;background:#f8fafc;cursor:pointer;font-family:inherit}
+.btn-go{width:100%;padding:22px;font-size:1.7rem;font-weight:900;border:none;border-radius:16px;cursor:pointer;background:#cbd5e1;color:#94a3b8;transition:background .2s,color .2s;font-family:inherit}
+.btn-go.ready{background:#4f46e5;color:#fff}
+
+/* ── INTRO ── */
+#s-intro{align-items:center;justify-content:center;padding:24px 32px;gap:22px}
+#s-intro h1{font-size:2.6rem;font-weight:900;color:#4f46e5}
+.greet{background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:999px;padding:12px 32px;font-size:1.3rem;font-weight:700;color:#4338ca}
+.menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;width:100%;max-width:980px}
+.menu-card{background:#fff;border:2.5px solid #f1f5f9;border-radius:28px;padding:50px 32px;display:flex;flex-direction:column;align-items:center;gap:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 16px rgba(0,0,0,.07)}
+.menu-card:hover{transform:translateY(-6px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.menu-icon{width:110px;height:110px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:2.8rem}
+.menu-card h3{font-size:1.7rem;font-weight:900;color:#1e293b}
+.step-badge{font-size:1.1rem;font-weight:700;padding:5px 18px;border-radius:999px}
+
+/* ── LEARN ── */
+#s-learn{padding:0;gap:0}
+.learn-body{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;padding:10px 18px 18px}
+.learn-panel{border-radius:20px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:12px;overflow:visible}
+.lp-left{background:#f5f3ff;border-bottom:5px solid #ddd6fe}
+.lp-right{background:#fff7ed;border-bottom:5px solid #fed7aa}
+.learn-panel h3{font-size:1.45rem;font-weight:900;background:#fff;padding:6px 20px;border-radius:999px;box-shadow:0 2px 5px rgba(0,0,0,.07)}
+.lp-left h3{color:#4f46e5}.lp-right h3{color:#ea580c}
+.btn-nav{width:96px;height:58px;border-radius:14px;background:#ea580c;border:none;color:#fff;font-size:1.55rem;cursor:pointer;font-weight:900;font-family:inherit}
+.btn-nav-right{width:70px;height:70px;border-radius:50%;background:#ea580c;border:none;color:#fff;font-size:1.6rem;cursor:pointer;font-weight:900;font-family:inherit;box-shadow:0 4px 12px rgba(234,88,12,.3);flex-shrink:0;transition:transform .1s}
+.btn-nav-right:active{transform:scale(.93)}
+.learn-hour-lbl{font-size:3.6rem;font-weight:900;color:#ea580c}
+.learn-hint{font-size:1.75rem;font-weight:700;color:#64748b;text-align:center;line-height:1.7}
+
+/* ── PRACTICE MENU ── */
+#s-practice{align-items:center;justify-content:center;gap:28px;padding:18px}
+.prac-row{display:flex;gap:32px;flex-wrap:wrap;justify-content:center}
+.prac-card{background:#fff;border-radius:32px;padding:60px 56px;display:flex;flex-direction:column;align-items:center;gap:18px;cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.09);transition:transform .15s}
+.prac-card:hover{transform:translateY(-5px)}
+.pcard-icon{width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#fff}
+
+/* ── QUIZ READ ── */
+#s-quiz-read{flex-direction:row}
+.qr-left{flex:1;display:flex;align-items:center;justify-content:center;padding:16px 16px 16px 16px;border-right:3px dashed #f1f5f9;overflow:visible}
+.qr-right{width:40%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;gap:16px}
+.qr-label{font-size:2.8rem;font-weight:900;color:#4f46e5;white-space:nowrap;margin:0}
+.spin-wrap{display:flex;align-items:center;gap:12px}
+.spin-box{display:flex;flex-direction:column;border-radius:18px;border:3px solid #8b5cf6;overflow:hidden;width:155px;box-shadow:0 4px 14px rgba(139,92,246,.18)}
+.spin-box.empty{border-style:dashed;border-color:#ddd6fe}
+.spin-arrow{width:100%;padding:10px 0;background:#7c3aed;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s}
+.spin-arrow:hover{background:#6d28d9}
+.spin-arrow:active{background:#5b21b6}
+.spin-num{background:#fff;text-align:center;font-size:3.6rem;font-weight:900;padding:12px 0;color:#7c3aed;line-height:1;font-family:inherit}
+.spin-num.empty-n{color:#ddd6fe}
+.spin-unit{font-size:2.4rem;font-weight:900;color:#94a3b8}
+.btn-check{width:100%;padding:22px;background:#7c3aed;color:#fff;font-size:1.5rem;font-weight:900;border:none;border-radius:14px;cursor:pointer;font-family:inherit}
+.btn-check:hover{background:#6d28d9}
+
+/* ── QUIZ SET ── */
+#s-quiz-set{flex-direction:row}
+.qs-left{width:36%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;gap:20px;border-right:3px dashed #f1f5f9}
+.qs-right{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;gap:14px;overflow:visible}
+.target-box{background:#fff7ed;border:4px dashed #fed7aa;border-radius:20px;padding:28px 40px;text-align:center}
+.target-box p{font-size:1.6rem;font-weight:700;color:#fb923c;margin-bottom:6px}
+.target-box h2{font-size:4.8rem;font-weight:900;color:#ea580c}
+.btn-check-set{width:100%;max-width:380px;padding:24px;background:#ea580c;color:#fff;font-size:1.8rem;font-weight:900;border:none;border-radius:16px;cursor:pointer;font-family:inherit}
+
+/* ── QUIZ sub-bar (guide btn) ── */
+.quiz-sub-bar{display:flex;align-items:center;justify-content:flex-end;padding:8px 18px 0;flex-shrink:0}
+.btn-guide{padding:10px 22px;border-radius:10px;font-weight:700;font-size:1.15rem;border:2px solid #e0e7ff;background:#fff;color:#4f46e5;cursor:pointer;font-family:inherit}
+.btn-guide.on{background:#4f46e5;color:#fff;border-color:#4f46e5}
+
+/* ── SOLVE CONFIG ── */
+#s-solve{align-items:center;justify-content:center;gap:22px;padding:18px}
+.solve-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.solve-num-btn{width:160px;height:160px;border-radius:28px;background:#fff;border:5px solid #d1fae5;color:#10b981;font-size:3.6rem;font-weight:900;cursor:pointer;font-family:inherit;transition:transform .15s;box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.solve-num-btn:hover{transform:translateY(-5px)}
+.tier-card{border-radius:22px;padding:22px 26px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 20px rgba(0,0,0,.1);text-align:left;color:#fff}
+.tier-card:hover{transform:translateY(-5px);box-shadow:0 12px 28px rgba(0,0,0,.18)}
+.tier-badge{display:inline-block;background:rgba(255,255,255,.28);color:#fff;font-size:.95rem;font-weight:900;padding:4px 14px;border-radius:999px;margin-bottom:10px}
+.tier-title{font-size:1.85rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:10px;white-space:nowrap;margin-bottom:8px}
+.tier-sub{font-size:1.15rem;font-weight:700;color:rgba(255,255,255,.92);margin:0 0 4px 0;white-space:nowrap}
+.tier-meta{font-size:1rem;font-weight:600;color:rgba(255,255,255,.82);margin:0;white-space:nowrap}
+
+/* ── RESULT ── */
+#s-result{align-items:center;justify-content:center;padding:24px 18px;gap:16px}
+#s-result h2{font-size:2.4rem;font-weight:900;color:#1e293b;text-align:center}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:520px}
+.res-box{border-radius:14px;padding:14px}
+.rb-g{background:#f0fdf4;border:2px solid #bbf7d0}
+.rb-o{background:#fff7ed;border:2px solid #fed7aa}
+.res-box h4{font-size:1.2rem;font-weight:700;margin-bottom:8px}
+.rb-g h4{color:#15803d}.rb-o h4{color:#c2410c}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px}
+.tag{padding:8px 22px;border-radius:10px;font-size:1.45rem;font-weight:700;white-space:nowrap}
+.tg{background:#fff;color:#16a34a;border:1.5px solid #bbf7d0}
+.to{background:#fff;color:#ea580c;border:1.5px solid #fed7aa}
+.tnone{color:#94a3b8;font-size:1.35rem;font-style:italic}
+.res-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+/* ── POPUP ── */
+#popup{position:absolute;inset:0;background:rgba(255,255,255,.97);display:none;align-items:center;justify-content:center;z-index:100;padding:18px}
+#popup.show{display:flex}
+.popup-box{background:#fff;border-radius:28px;padding:36px 40px;max-width:820px;width:100%;box-shadow:0 8px 36px rgba(0,0,0,.1);border:2px solid #f1f5f9;display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center}
+.clock-wrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.clock-lbl{font-size:1.6rem;font-weight:700;padding:8px 24px;border-radius:999px}
+.clock-lbl.wrong-lbl{background:#fee2e2;color:#991b1b}
+.clock-lbl.correct-lbl{background:#dcfce7;color:#166534}
+.popup-icon{font-size:4.2rem}
+.popup-title{font-size:3rem;font-weight:900}
+.popup-title.ok{color:#16a34a}.popup-title.ng{color:#ea580c}
+.popup-body{font-size:1.3rem;font-weight:700;color:#475569;line-height:1.7}
+.popup-hl{display:inline-block;background:#fef9c3;padding:4px 20px;border-radius:9px;font-size:2rem;font-weight:900;color:#1e293b;margin:2px 0}
+.popup-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.pb{padding:20px 48px;border-radius:16px;font-size:1.5rem;font-weight:900;border:none;cursor:pointer;font-family:inherit}
+.pb.blue{background:#4f46e5;color:#fff}
+.pb.orange{background:#ea580c;color:#fff}
+.pb.gray{background:#f1f5f9;color:#475569}
+.goal-item{display:flex;align-items:flex-start;gap:12px;background:#fff;border-radius:14px;padding:12px 14px;border:1.5px solid #fde68a}
+.goal-num{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:#f59e0b;color:#fff;font-size:.9rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.goal-text{font-size:1rem;font-weight:600;color:#374151;line-height:1.6;word-break:keep-all;overflow-wrap:break-word}
+.goal-text strong{color:#92400e;font-weight:800}
+.flow-step{font-size:.75rem;font-weight:700;color:#fff;padding:4px 10px;border-radius:999px;white-space:nowrap}
+canvas{display:block}
+@keyframes pulse-btn{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(124,58,237,.3)}50%{transform:scale(1.04);box-shadow:0 0 0 8px rgba(124,58,237,.0)}}
+</style>
+</head>
+<body>
+<div class="scale-wrap"><div class="scale-root"><div class="app">
+
+  <!-- ── GLOBAL HEADER ── -->
+  <div id="g-header" class="hidden-hdr">
+    <div class="hdr-row1">
+      <!-- 1. 홈 버튼 -->
+      <button class="btn-home" onclick="goHome()" title="홈으로">🏠</button>
+
+      <!-- 2. 단계 버튼들 -->
+      <div class="hdr-steps" id="hdr-steps">
+        <div class="hdr-step" id="hs-0" onclick="hdrGo(0)">
+          <span class="step-num">0</span><span>시작</span>
+        </div>
+        <div class="hdr-sep"></div>
+        <div class="hdr-step" id="hs-1" onclick="hdrGo(1)">
+          <span class="step-num">1</span><span>개념 익히기</span>
+        </div>
+        <div class="hdr-sep"></div>
+        <div class="hdr-step" id="hs-2" onclick="hdrGo(2)">
+          <span class="step-num">2</span><span>연습 하기</span>
+        </div>
+        <div class="hdr-sep"></div>
+        <div class="hdr-step" id="hs-3" onclick="hdrGo(3)">
+          <span class="step-num">3</span><span>문제 풀기</span>
+        </div>
+      </div>
+
+      <!-- 4. 학생 이름 -->
+      <div class="hdr-student" id="hdr-stu">—</div>
+    </div>
+    <!-- 3. 진행바 + 타이머 + 가이드 버튼 -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:0">
+      <div class="hdr-row2" style="flex:1">
+        <div class="hdr-progress-fill" id="hdr-fill" style="width:0%;background:#4f46e5"></div>
+      </div>
+      <div id="hdr-timer" style="display:none;flex-shrink:0;background:#fef3c7;color:#b45309;font-weight:900;font-size:1.15rem;padding:6px 16px;border-radius:999px;white-space:nowrap">⏱️ <span id="timer-val">0:00</span></div>
+      <button class="btn-guide on" id="g-btn" onclick="togGuide()" style="flex-shrink:0;margin-bottom:2px;display:none">가이드 켜기</button>
+    </div>
+  </div>
+
+  <!-- POPUP -->
+  <div id="popup">
+    <div class="popup-box">
+      <div style="display:flex;align-items:center;gap:10px;justify-content:center">
+        <div class="popup-icon" id="p-icon"></div>
+        <div class="popup-title" id="p-title"></div>
+      </div>
+      <!-- 시계 영역: 틀렸을 때는 2개(학생 입력 / 정답), 맞았을 때는 1개(정답) -->
+      <div id="p-clocks" style="display:none;gap:20px;justify-content:center;align-items:flex-end"></div>
+      <div class="popup-body" id="p-body"></div>
+      <div class="popup-btns" id="p-btns"></div>
+    </div>
+  </div>
+
+  <!-- START -->
+  <div class="screen active" id="s-start">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:40px 60px;background:#fff">
+
+      <!-- 요정 -->
+      <div class="fairy" id="fairy-start" style="width:200px;height:250px"></div>
+
+      <!-- 학년 배지 -->
+      <div class="badge" style="font-size:1.25rem;padding:9px 28px">수학 1-2학년군</div>
+
+      <!-- 제목 -->
+      <h1 style="font-size:3.8rem;font-weight:900;color:#4f46e5;line-height:1.15;text-align:center;white-space:nowrap;letter-spacing:-.01em;margin:0">시계 요정의 하루</h1>
+
+      <!-- 오늘의 공부 약속 -->
+      <div style="background:#fefce8;border:3px solid #fbbf24;border-radius:20px;padding:20px 40px;display:flex;align-items:center;gap:14px">
+        <span style="font-size:2rem">📖</span>
+        <span style="font-size:1.5rem;font-weight:800;color:#78350f;white-space:nowrap">오늘은 시계를 읽고, 바늘을 돌리고, 시각을 설명해 봐요!</span>
+      </div>
+
+      <!-- 활동 시작 버튼 -->
+      <button class="btn-xl" style="padding:20px 64px;font-size:1.6rem;border-radius:20px;box-shadow:0 8px 0 #3730a3" onclick="go('student')">활동 시작! →</button>
+
+    </div>
+  </div>
+
+  <!-- STUDENT -->
+  <div class="screen" id="s-student">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:18px">
+      <h2 style="font-size:2.8rem;font-weight:900;color:#4f46e5;text-align:center">누구인가요? <span class="fairy-sm" id="fairy-student"></span><br><span style="font-size:1.4rem;font-weight:600;color:#94a3b8">이름을 골라주세요</span></h2>
+
+      <!-- 연결 상태 배지 -->
+      <div id="conn-badge" style="font-size:1rem;font-weight:700;padding:6px 18px;border-radius:999px;background:#f1f5f9;color:#64748b"></div>
+
+      <div class="sel-box">
+        <select id="stu-sel" onchange="onStu()">
+          <option value="">학생을 선택하세요 ▼</option>
+        </select>
+        <button class="btn-go" id="btn-go" onclick="goGoal()">공부 시작하기!</button>
+      </div>
+
+      <!-- ⚙️ 설정 패널 (선생님 설정 — 학생용 링크 접속 시 렌더링 안 됨) -->
+      <div id="teacher-settings" style="width:100%;max-width:720px;border:2px solid #e0e7ff;border-radius:18px;overflow:hidden">
+        <button onclick="toggleSettings()" style="width:100%;padding:14px 20px;background:#f8faff;border:none;cursor:pointer;font-family:inherit;font-size:1.1rem;font-weight:700;color:#4f46e5;text-align:left;display:flex;align-items:center;gap:10px">
+          <span>⚙️</span><span>선생님 설정</span><span id="settings-arrow" style="margin-left:auto">▼</span>
+        </button>
+        <div id="settings-body" style="display:none;padding:20px;background:#fff;border-top:1.5px solid #e0e7ff;display:flex;flex-direction:column;gap:14px">
+          <p style="font-size:1rem;color:#475569;margin:0">아래에 구글 시트의 <strong>웹 앱 .../exec 주소</strong>를 입력하면 실제 학생 명단과 학습 기록이 연동됩니다.</p>
+          <div style="display:flex;gap:10px">
+            <input id="exec-input" type="text" placeholder="https://script.google.com/macros/s/.../exec"
+              style="flex:1;padding:12px 16px;border:2px solid #c7d2fe;border-radius:12px;font-size:1rem;font-family:inherit;outline:none">
+            <button onclick="connectExec()" style="padding:12px 24px;background:#4f46e5;color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">연결하기</button>
+          </div>
+          <div id="student-link-box" style="display:none;background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:8px">
+            <p style="font-size:.95rem;font-weight:700;color:#166534;margin:0">학생용 입장 주소 (학생들에게 공유하세요)</p>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input id="student-link-input" type="text" readonly style="flex:1;padding:10px 14px;border:1.5px solid #86efac;border-radius:10px;font-size:.9rem;background:#fff;font-family:inherit;color:#15803d">
+              <button onclick="copyStudentLink()" style="padding:10px 18px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit">복사</button>
+            </div>
+          </div>
+          <button onclick="disconnectExec()" style="background:none;border:none;color:#94a3b8;font-size:.9rem;cursor:pointer;text-decoration:underline;font-family:inherit;text-align:left">연결 해제 (데모 모드로 돌아가기)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOAL (오늘의 학습목표) -->
+  <div class="screen" id="s-goal">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:28px 60px;background:#fff">
+
+      <!-- 헤더 -->
+      <div style="display:flex;align-items:center;gap:14px">
+        <span style="font-size:2.4rem">🎯</span>
+        <h2 style="font-size:2.2rem;font-weight:900;color:#92400e;margin:0;letter-spacing:.01em">오늘의 학습목표</h2>
+      </div>
+
+      <!-- 학습자 이름 인사 -->
+      <p style="font-size:1.4rem;font-weight:700;color:#4f46e5;margin:0" id="goal-greet"></p>
+
+      <!-- 목표 박스 -->
+      <div style="width:100%;max-width:860px;background:#fefce8;border:3px solid #fbbf24;border-radius:24px;padding:24px 32px;display:flex;flex-direction:column;gap:14px">
+        <p style="font-size:1.45rem;font-weight:700;color:#78350f;margin:0;text-align:center">이 활동이 끝나면 나는…</p>
+        <div class="goal-item" style="padding:14px 20px;border-radius:16px">
+          <span class="goal-num" style="width:40px;height:40px;font-size:1.3rem;flex-shrink:0">1</span>
+          <span class="goal-text" style="font-size:1.45rem">시계의 짧은 바늘과 긴 바늘을 보고 <strong>"몇 시"인지 말할 수 있어요</strong></span>
+        </div>
+        <div class="goal-item" style="padding:14px 20px;border-radius:16px">
+          <span class="goal-num" style="width:40px;height:40px;font-size:1.3rem;flex-shrink:0">2</span>
+          <span class="goal-text" style="font-size:1.45rem">주어진 시각에 맞게 <strong>시계 바늘을 돌려 맞출 수 있어요</strong></span>
+        </div>
+        <div class="goal-item" style="padding:14px 20px;border-radius:16px">
+          <span class="goal-num" style="width:40px;height:40px;font-size:1.3rem;flex-shrink:0">3</span>
+          <span class="goal-text" style="font-size:1.45rem">시계를 보며 시각을 <strong>친구에게 설명할 수 있어요</strong></span>
+        </div>
+      </div>
+
+      <!-- 다음 단계 버튼 -->
+      <button class="btn-xl" style="padding:20px 80px;font-size:1.6rem;border-radius:20px;box-shadow:0 8px 0 #3730a3;margin-top:8px" onclick="goIntro()">시작해 볼까요! →</button>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="screen" id="s-intro">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 20px">
+      <h1 style="font-size:1.8rem;font-weight:900;color:#4f46e5;display:flex;align-items:center;gap:8px">시계 요정의 하루 <span class="fairy-sm" id="fairy-intro"></span></h1>
+      <div class="greet" id="greet-lbl"></div>
+      <div class="menu-grid">
+        <div class="menu-card" onclick="go('learn');initLearn()">
+          <div class="step-badge" style="background:#eef2ff;color:#4f46e5">1단계</div>
+          <div class="menu-icon" style="background:#4f46e5">📖</div>
+          <h3>개념 익히기</h3>
+        </div>
+        <div class="menu-card" onclick="go('practice')">
+          <div class="step-badge" style="background:#eff6ff;color:#3b82f6">2단계</div>
+          <div class="menu-icon" style="background:#3b82f6">✏️</div>
+          <h3>연습 하기</h3>
+        </div>
+        <div class="menu-card" onclick="goSolve()">
+          <div class="step-badge" style="background:#f0fdf4;color:#22c55e">3단계</div>
+          <div class="menu-icon" style="background:#22c55e">🏆</div>
+          <h3>문제 풀기</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEARN -->
+  <div class="screen" id="s-learn">
+    <div style="flex-shrink:0;padding:10px 20px 0;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:1.45rem;font-weight:900;color:#4f46e5">📖 개념 익히기</span>
+    </div>
+    <div class="learn-body">
+
+      <!-- 왼쪽: 시계 읽기 -->
+      <div class="learn-panel lp-left">
+        <h3>시계 읽기</h3>
+        <!-- 가이드 버블이 canvas 바깥으로 나올 수 있도록 overflow:visible wrapper -->
+        <div style="overflow:visible;padding-top:32px;position:relative">
+          <canvas id="lc-static" width="260" height="300"></canvas>
+        </div>
+        <p class="learn-hint">긴 바늘이 <strong style="color:#4f46e5;font-size:1.9rem">12</strong>에 딱 있으면<br><strong style="color:#4f46e5;font-size:1.8rem">"~시"</strong>라고 읽어요!</p>
+      </div>
+
+      <!-- 오른쪽: 직접 바꿔보기 -->
+      <div class="learn-panel lp-right">
+        <h3>직접 바꿔보기</h3>
+        <!-- 안내 문구 -->
+        <div style="background:#fff3e0;border:2px solid #fed7aa;border-radius:14px;padding:10px 18px;display:flex;align-items:center;gap:8px;width:100%">
+          <span style="font-size:1.3rem">👆</span>
+          <span style="font-size:1.2rem;font-weight:700;color:#c2410c">화살표를 눌러 시각을 변경해보세요!</span>
+        </div>
+        <!-- 시계: 가이드 버블 공간 포함 -->
+        <div style="overflow:visible;position:relative">
+          <canvas id="lc-inter" width="220" height="260"></canvas>
+        </div>
+        <!-- 시각 레이블 + 오른쪽 화살표 -->
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="learn-hour-lbl" id="lh-lbl">3시</div>
+          <button class="btn-nav-right" onclick="lhClick(1)">▶</button>
+        </div>
+        <!-- 다음 단계 버튼 -->
+        <button id="learn-next-btn"
+          onclick="go('practice')"
+          style="width:100%;padding:16px 0;border-radius:16px;border:none;font-family:inherit;font-size:1.35rem;font-weight:900;cursor:not-allowed;background:#e2e8f0;color:#94a3b8;transition:all .3s"
+          disabled>
+          연습하기로 넘어가기 →
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PRACTICE -->
+  <div class="screen" id="s-practice">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:18px">
+      <h2 style="font-size:2.8rem;font-weight:900;color:#1e293b">어떤 도전을 할까?</h2>
+      <div class="prac-row">
+        <div class="prac-card" style="border-bottom:5px solid #c7d2fe" onclick="startTutorial('read')">
+          <div class="pcard-icon" style="background:#4f46e5">📖</div>
+          <h3 style="color:#4f46e5;font-size:2rem;font-weight:900">시계 읽기</h3>
+          <span style="font-size:1.4rem;color:#94a3b8;font-weight:600">3문제</span>
+        </div>
+        <div class="prac-card" style="border-bottom:5px solid #bfdbfe" onclick="startTutorial('set')">
+          <div class="pcard-icon" style="background:#3b82f6">✏️</div>
+          <h3 style="color:#3b82f6;font-size:2rem;font-weight:900">바늘 돌리기</h3>
+          <span style="font-size:1.4rem;color:#94a3b8;font-weight:600">3문제</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TUTORIAL POPUP -->
+  <div id="tut-popup" style="display:none;position:absolute;inset:0;z-index:200;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:24px">
+    <div style="background:#fff;border-radius:28px;width:100%;max-width:860px;max-height:92%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.2)">
+      <!-- 팝업 헤더 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.25rem;font-weight:900;color:#4f46e5;background:#eef2ff;padding:8px 20px;border-radius:999px">📋 사용 방법 안내</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;gap:6px" id="tut-dots"></div>
+          <button onclick="closeTutorial()" style="background:#f1f5f9;border:none;width:42px;height:42px;border-radius:12px;cursor:pointer;font-size:1.4rem;display:flex;align-items:center;justify-content:center;color:#64748b;font-family:inherit">✕</button>
+        </div>
+      </div>
+      <!-- 본문 -->
+      <div style="flex:1;display:flex;gap:0;overflow:hidden;min-height:0;padding:18px 0 0">
+        <!-- 왼쪽: 설명 -->
+        <div style="width:44%;display:flex;flex-direction:column;justify-content:center;padding:20px 28px;gap:16px;border-right:2px dashed #f1f5f9;overflow:hidden">
+          <div id="tut-icon" style="font-size:4rem"></div>
+          <span id="tut-step-label" style="font-size:1.4rem;font-weight:700;background:#eef2ff;color:#4f46e5;padding:9px 24px;border-radius:999px;display:inline-block;width:fit-content"></span>
+          <h3 id="tut-title" style="font-size:1.9rem;font-weight:900;color:#1e293b;line-height:1.4;word-break:keep-all"></h3>
+          <p id="tut-desc" style="font-size:1.5rem;font-weight:600;color:#475569;line-height:1.8;word-break:keep-all"></p>
+        </div>
+        <!-- 오른쪽: 시각 자료 -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 24px;background:#f8fafc;gap:14px" id="tut-visual"></div>
+      </div>
+      <!-- 하단 버튼 -->
+      <div style="flex-shrink:0;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;border-top:1.5px solid #f1f5f9">
+        <button id="tut-prev" style="background:#f1f5f9;border:none;padding:16px 34px;border-radius:14px;font-weight:700;font-size:1.5rem;color:#475569;cursor:pointer;font-family:inherit" onclick="tutNav(-1)">← 이전</button>
+        <span style="font-size:1.45rem;font-weight:700;color:#94a3b8" id="tut-counter"></span>
+        <button id="tut-next" style="background:#4f46e5;color:#fff;border:none;padding:16px 42px;border-radius:14px;font-weight:700;font-size:1.5rem;cursor:pointer;font-family:inherit" onclick="tutNav(1)">다음 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ READ -->
+  <div class="screen" id="s-quiz-read">
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <!-- 안내 문구: 전체 너비 정중앙 -->
+      <div style="width:100%;text-align:center;padding:18px 0 8px;flex-shrink:0">
+        <p class="qr-label">시계를 보고 몇 시인지 읽어봅시다</p>
+      </div>
+      <!-- 시계 + 입력 -->
+      <div style="flex:1;display:flex;overflow:hidden">
+        <div class="qr-left">
+          <canvas id="qr-clock" width="340" height="400"></canvas>
+        </div>
+        <div class="qr-right">
+          <div class="spin-wrap">
+            <div class="spin-box empty" id="h-spin">
+              <button class="spin-arrow" onclick="spinH(1)">
+                <svg width="26" height="15" viewBox="0 0 26 15" fill="none"><path d="M2 13L13 2L24 13" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="spin-num empty-n" id="h-num">?</div>
+              <button class="spin-arrow" onclick="spinH(-1)">
+                <svg width="26" height="15" viewBox="0 0 26 15" fill="none"><path d="M2 2L13 13L24 2" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <span class="spin-unit">시</span>
+          </div>
+          <button class="btn-check" onclick="checkRead()">정답 확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ SET -->
+  <div class="screen" id="s-quiz-set">
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <!-- 안내 문구: 전체 너비 정중앙 -->
+      <div style="width:100%;text-align:center;padding:18px 0 8px;flex-shrink:0">
+        <p style="font-size:2.8rem;font-weight:900;color:#4f46e5;white-space:nowrap;margin:0">시계에 시각을 나타내 봅시다</p>
+      </div>
+      <!-- 도전시각 + 시계 -->
+      <div style="flex:1;display:flex;overflow:hidden">
+        <div class="qs-left">
+          <div class="target-box">
+            <p>도전 시각</p>
+            <h2 id="qs-target"></h2>
+          </div>
+        </div>
+        <div class="qs-right">
+          <canvas id="qs-clock" width="320" height="390"></canvas>
+          <button class="btn-check-set" onclick="checkSet()">정답 확인!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOLVE -->
+  <div class="screen" id="s-solve">
+    <div id="sl-mode" style="display:flex;flex-direction:column;align-items:center;gap:28px;flex:1;justify-content:center;padding:18px">
+      <h2 style="font-size:3rem;font-weight:900;color:#16a34a;text-align:center;white-space:nowrap">어떤 문제를 풀어볼까요?</h2>
+      <div class="prac-row">
+        <div class="prac-card" style="border-bottom:6px solid #c7d2fe;padding:56px 64px" onclick="setSM('read')">
+          <div class="pcard-icon" style="background:#4f46e5;width:130px;height:130px;font-size:3.2rem">📖</div>
+          <h3 style="color:#4f46e5;font-size:2.2rem;font-weight:900;white-space:nowrap">시계 읽기</h3>
+        </div>
+        <div class="prac-card" style="border-bottom:6px solid #bfdbfe;padding:56px 64px" onclick="setSM('set')">
+          <div class="pcard-icon" style="background:#3b82f6;width:130px;height:130px;font-size:3.2rem">✏️</div>
+          <h3 style="color:#3b82f6;font-size:2.2rem;font-weight:900;white-space:nowrap">바늘 돌리기</h3>
+        </div>
+      </div>
+    </div>
+    <div id="sl-count" style="display:none;flex-direction:column;align-items:center;gap:18px;flex:1;justify-content:center;padding:24px 28px">
+      <div style="font-size:2.6rem">⚡</div>
+      <h2 style="font-size:2.6rem;font-weight:900;color:#ea580c;text-align:center;white-space:nowrap;margin:0">도전 단계를 골라요!</h2>
+      <p style="font-size:1.3rem;font-weight:700;color:#475569;text-align:center;white-space:nowrap;margin:0">7문제를 정해진 시간 안에! 어떤 칭호에 도전할까요?</p>
+      <div style="width:100%;max-width:720px;display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px">
+        <!-- 30초 -->
+        <div class="tier-card" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)" onclick="startQ(G.sm,7,30)">
+          <span class="tier-badge">30초 도전</span>
+          <div class="tier-title"><span style="font-size:1.8rem">⚡</span> 번개 시계왕</div>
+          <p class="tier-sub">시계의 전설이 된 도전자</p>
+          <p class="tier-meta">한 문제당 4초 · 번개처럼 빠르게!</p>
+        </div>
+        <!-- 1분 -->
+        <div class="tier-card" style="background:linear-gradient(135deg,#fb923c,#ea580c)" onclick="startQ(G.sm,7,60)">
+          <span class="tier-badge">1분 도전</span>
+          <div class="tier-title"><span style="font-size:1.8rem">🕐</span> 황금 시계요정</div>
+          <p class="tier-sub">시계를 척척 읽는 실력자</p>
+          <p class="tier-meta">한 문제당 9초 · 자신있게 도전!</p>
+        </div>
+        <!-- 2분 -->
+        <div class="tier-card" style="background:linear-gradient(135deg,#60a5fa,#3b82f6)" onclick="startQ(G.sm,7,120)">
+          <span class="tier-badge">2분 도전</span>
+          <div class="tier-title"><span style="font-size:1.8rem">🗺️</span> 시계 탐험가</div>
+          <p class="tier-sub">시계를 차근차근 익히는 모험가</p>
+          <p class="tier-meta">한 문제당 17초 · 차근차근 도전!</p>
+        </div>
+        <!-- 4분 -->
+        <div class="tier-card" style="background:linear-gradient(135deg,#4ade80,#22c55e)" onclick="startQ(G.sm,7,240)">
+          <span class="tier-badge">4분 도전</span>
+          <div class="tier-title"><span style="font-size:1.8rem">🌱</span> 꼬마 시계친구</div>
+          <p class="tier-sub">시계와 막 친해지는 새싹</p>
+          <p class="tier-meta">한 문제당 34초 · 천천히 도전!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="s-result">
+    <div style="flex:1;width:100%;display:flex;flex-direction:column;align-items:stretch;justify-content:center;padding:12px 24px;gap:10px;background:linear-gradient(160deg,#fdf6ff 0%,#eff6ff 100%);overflow:hidden;box-sizing:border-box">
+    <div style="width:100%;display:flex;flex-direction:column;align-items:stretch;gap:10px;box-sizing:border-box">
+
+      <!-- 트로피 -->
+      <div style="font-size:2.2rem;text-align:center;line-height:1">🏆</div>
+
+      <!-- 타이틀 -->
+      <h2 id="res-title" style="font-size:2.2rem;font-weight:900;color:#ea580c;text-align:center;margin:0;white-space:nowrap"></h2>
+
+      <!-- 시간 도전 칭호 -->
+      <div id="res-badge" style="display:none;align-items:center;justify-content:center;gap:10px;background:#fffbeb;border:2px solid #f59e0b;border-radius:14px;padding:12px 20px;width:100%"></div>
+
+      <!-- 학습자 정보 카드 -->
+      <div style="width:100%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div style="background:#e0f2fe;border-radius:14px;padding:10px 16px;text-align:center">
+          <p style="font-size:1.2rem;color:#0369a1;font-weight:700;margin:0 0 2px;white-space:nowrap">학습자 성명</p>
+          <p style="font-size:1.6rem;font-weight:900;color:#075985;margin:0;white-space:nowrap" id="res-student-name"></p>
+        </div>
+        <div style="background:#fef9c3;border-radius:14px;padding:10px 16px;text-align:center">
+          <p style="font-size:1.2rem;color:#92400e;font-weight:700;margin:0 0 2px;white-space:nowrap">학습 단계</p>
+          <p style="font-size:1.6rem;font-weight:900;color:#92400e;margin:0;white-space:nowrap" id="res-mode-label"></p>
+        </div>
+        <div style="background:#d1fae5;border-radius:14px;padding:10px 16px;text-align:center">
+          <p style="font-size:1.2rem;color:#065f46;font-weight:700;margin:0 0 2px;white-space:nowrap">학습한 날짜</p>
+          <p style="font-size:1.6rem;font-weight:900;color:#065f46;margin:0;white-space:nowrap" id="res-date"></p>
+        </div>
+      </div>
+
+      <!-- 숨겨진 통계 (시트 기록용) -->
+      <span id="res-solve-count" style="display:none">0</span>
+      <span id="res-retry-count" style="display:none">0</span>
+      <span id="res-hint-count" style="display:none">0</span>
+
+      <!-- 문제 결과 카드 (3개 한 줄, 못 푼 카드는 동적 표시) -->
+      <div id="res-cards-row" style="width:100%;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:#ecfdf5;border:2px solid #6ee7b7;border-radius:14px;padding:12px 16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:1.4rem">✅</span>
+            <h4 style="font-size:1.4rem;font-weight:900;color:#065f46;margin:0;white-space:nowrap">한번에 푼 문제</h4>
+          </div>
+          <div class="tag-row" id="res-ok"></div>
+        </div>
+        <div style="background:#fff7ed;border:2px solid #fdba74;border-radius:14px;padding:12px 16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:1.4rem">🔄</span>
+            <h4 style="font-size:1.4rem;font-weight:900;color:#c2410c;margin:0;white-space:nowrap">틀린 문제</h4>
+          </div>
+          <div class="tag-row" id="res-ng"></div>
+        </div>
+        <!-- 못 푼 문제 (도전 모드 시간 초과 시에만 표시) -->
+        <div id="res-unsolved-card" style="display:none;background:#f1f5f9;border:2px solid #cbd5e1;border-radius:14px;padding:12px 16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="font-size:1.4rem">⏰</span>
+            <h4 style="font-size:1.4rem;font-weight:900;color:#475569;margin:0;white-space:nowrap">못 푼 문제</h4>
+          </div>
+          <div class="tag-row" id="res-unsolved"></div>
+        </div>
+      </div>
+
+      <!-- 기본 버튼 (틀린 문제 다시 풀기 전) -->
+      <div id="res-btns-default" style="width:100%;display:grid;grid-template-columns:1fr 2fr;gap:10px">
+        <button class="pb gray" style="font-size:1.5rem;padding:16px;white-space:nowrap" onclick="go('intro')">메인 메뉴로</button>
+        <button id="res-retry-btn" class="pb orange" style="font-size:1.5rem;padding:16px;background:#ea580c;white-space:nowrap" onclick="startMissedRetry()">🔁 틀린·못 푼 문제 다시 풀기</button>
+      </div>
+
+      <!-- 다시 풀기 완료 후 단계 선택 버튼 (처음엔 숨김) -->
+      <div id="res-btns-after" style="display:none;width:100%;flex-direction:column;gap:12px;align-items:center">
+        <p id="res-after-msg" style="font-size:1.55rem;font-weight:800;color:#4f46e5;margin:0;white-space:nowrap">🎉 다시 풀기 완료! 다음 단계를 선택해봐요</p>
+        <div style="width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <button class="pb" style="background:#4f46e5;color:#fff;font-size:1.5rem;padding:18px;border-radius:16px;white-space:nowrap" onclick="go('learn');initLearn()">📖 개념 익히기</button>
+          <button class="pb" style="background:#3b82f6;color:#fff;font-size:1.5rem;padding:18px;border-radius:16px;white-space:nowrap" onclick="go('practice')">✏️ 연습 하기</button>
+          <button class="pb" style="background:#22c55e;color:#fff;font-size:1.5rem;padding:18px;border-radius:16px;white-space:nowrap" onclick="goSolve()">🏆 문제 풀기</button>
+        </div>
+        <button class="pb gray" style="font-size:1.5rem;padding:16px;width:100%;border-radius:16px;white-space:nowrap" onclick="go('intro')">메인 메뉴로</button>
+      </div>
+    </div><!-- /width:100% wrapper -->
+    </div>
+  </div>
+
+</div></div></div><!-- .app -->
+
+<script>
+/* ── SCALE 반응형 ── */
+function applyScale(){
+  var W=window.innerWidth, H=window.innerHeight;
+  var s=Math.min(W/1024, H/768);
+  var root=document.querySelector('.scale-root');
+  var wrap=document.querySelector('.scale-wrap');
+  if(!root||!wrap)return;
+  root.style.transform='scale('+s+')';
+  wrap.style.width=(1024*s)+'px';
+  wrap.style.height=(768*s)+'px';
+}
+window.addEventListener('resize',applyScale);
+var FAIRY_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="100%" height="100%"><defs><linearGradient id="b-fur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0D2AE"/><stop offset="1" stop-color="#DDB283"/></linearGradient><radialGradient id="b-wing" cx="50%" cy="40%" r="65%"><stop offset="0" stop-color="#F3ECFF" stop-opacity="0.95"/><stop offset="1" stop-color="#C8B8FF" stop-opacity="0.6"/></radialGradient><radialGradient id="b-glow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FDE68A" stop-opacity="0.85"/><stop offset="1" stop-color="#FCD34D" stop-opacity="0"/></radialGradient></defs><!-- 바닥 그림자 --><ellipse cx="200" cy="476" rx="92" ry="13" fill="#A78BFA" opacity="0.25"/><!-- 반짝이 --><circle cx="58" cy="120" r="5" fill="#FCD34D"/><circle cx="346" cy="135" r="4.5" fill="#FCD34D"/><circle cx="44" cy="280" r="4" fill="#F9A8D4"/><circle cx="360" cy="268" r="4" fill="#F9A8D4"/><path d="M78,86 l3,9 9,3 -9,3 -3,9 -3,-9 -9,-3 9,-3z" fill="#FCD34D"/><path d="M326,98 l2.5,8 8,2.5 -8,2.5 -2.5,8 -2.5,-8 -8,-2.5 8,-2.5z" fill="#F9A8D4"/><path d="M50,360 l2.5,7 7,2.5 -7,2.5 -2.5,7 -2.5,-7 -7,-2.5 7,-2.5z" fill="#C4B5FD"/><!-- ===== 요정 날개 (뒤) ===== --><ellipse cx="108" cy="300" rx="50" ry="70" fill="url(#b-wing)" stroke="#C4B5FD" stroke-width="3" transform="rotate(-26,108,300)"/><ellipse cx="120" cy="370" rx="36" ry="50" fill="url(#b-wing)" stroke="#C4B5FD" stroke-width="3" transform="rotate(-12,120,370)"/><ellipse cx="292" cy="300" rx="50" ry="70" fill="url(#b-wing)" stroke="#C4B5FD" stroke-width="3" transform="rotate(26,292,300)"/><ellipse cx="280" cy="370" rx="36" ry="50" fill="url(#b-wing)" stroke="#C4B5FD" stroke-width="3" transform="rotate(12,280,370)"/><!-- ===== 다리 ===== --><ellipse cx="168" cy="438" rx="26" ry="20" fill="url(#b-fur)" stroke="#C9975F" stroke-width="3"/><ellipse cx="232" cy="438" rx="26" ry="20" fill="url(#b-fur)" stroke="#C9975F" stroke-width="3"/><ellipse cx="168" cy="442" rx="13" ry="9" fill="#F5E3CE"/><ellipse cx="232" cy="442" rx="13" ry="9" fill="#F5E3CE"/><!-- ===== 몸통 ===== --><ellipse cx="200" cy="345" rx="92" ry="96" fill="url(#b-fur)" stroke="#C9975F" stroke-width="3.5"/><!-- 팔 (시계를 안은 모습) --><path d="M 120 300 Q 95 345 130 380" fill="none" stroke="#DDB283" stroke-width="30" stroke-linecap="round"/><path d="M 280 300 Q 305 345 270 380" fill="none" stroke="#DDB283" stroke-width="30" stroke-linecap="round"/><ellipse cx="132" cy="385" rx="20" ry="16" fill="url(#b-fur)" stroke="#C9975F" stroke-width="2.5"/><ellipse cx="268" cy="385" rx="20" ry="16" fill="url(#b-fur)" stroke="#C9975F" stroke-width="2.5"/><!-- ===== 배 시계 ===== --><circle cx="200" cy="340" r="74" fill="#F59E0B"/><circle cx="200" cy="340" r="68" fill="#FFFDF0" stroke="#FDE68A" stroke-width="3"/><!-- 눈금 4개 --><rect x="196" y="280" width="8" height="15" rx="4" fill="#7C3AED"/><rect x="259" y="336" width="15" height="8" rx="4" fill="#7C3AED"/><rect x="196" y="385" width="8" height="15" rx="4" fill="#7C3AED"/><rect x="126" y="336" width="15" height="8" rx="4" fill="#7C3AED"/><!-- 보조 눈금 --><circle cx="237" cy="303" r="3" fill="#C4B5FD"/><circle cx="263" cy="340" r="3" fill="#C4B5FD" opacity="0"/><circle cx="237" cy="377" r="3" fill="#C4B5FD"/><circle cx="163" cy="377" r="3" fill="#C4B5FD"/><circle cx="163" cy="303" r="3" fill="#C4B5FD"/><!-- 숫자 --><text x="200" y="312" font-family="Jua,sans-serif" font-size="18" fill="#4C1D95" font-weight="900" text-anchor="middle">12</text><text x="236" y="346" font-family="Jua,sans-serif" font-size="18" fill="#4C1D95" font-weight="900" text-anchor="middle">3</text><text x="200" y="382" font-family="Jua,sans-serif" font-size="18" fill="#4C1D95" font-weight="900" text-anchor="middle">6</text><text x="164" y="346" font-family="Jua,sans-serif" font-size="18" fill="#4C1D95" font-weight="900" text-anchor="middle">9</text><!-- 바늘 7:15 --><line x1="200" y1="340" x2="184" y2="361" stroke="#16A34A" stroke-width="7" stroke-linecap="round"/><line x1="200" y1="340" x2="236" y2="340" stroke="#DB2777" stroke-width="5" stroke-linecap="round"/><circle cx="200" cy="340" r="7" fill="#4C1D95"/><circle cx="200" cy="340" r="3.5" fill="#fff"/><!-- ===== 귀 ===== --><circle cx="128" cy="98" r="42" fill="url(#b-fur)" stroke="#C9975F" stroke-width="3.5"/><circle cx="272" cy="98" r="42" fill="url(#b-fur)" stroke="#C9975F" stroke-width="3.5"/><circle cx="128" cy="100" r="24" fill="#F7C9C9"/><circle cx="272" cy="100" r="24" fill="#F7C9C9"/><!-- ===== 머리 ===== --><circle cx="200" cy="165" r="100" fill="url(#b-fur)" stroke="#C9975F" stroke-width="3.5"/><!-- 볼터치 --><ellipse cx="135" cy="185" rx="22" ry="15" fill="#FF9EC4" opacity="0.5"/><ellipse cx="265" cy="185" rx="22" ry="15" fill="#FF9EC4" opacity="0.5"/><!-- 눈 --><ellipse cx="160" cy="155" rx="13" ry="16" fill="#3D2C5C"/><ellipse cx="240" cy="155" rx="13" ry="16" fill="#3D2C5C"/><circle cx="155" cy="148" r="5" fill="#fff"/><circle cx="235" cy="148" r="5" fill="#fff"/><circle cx="164" cy="161" r="2.5" fill="#fff" opacity="0.8"/><circle cx="244" cy="161" r="2.5" fill="#fff" opacity="0.8"/><!-- 주둥이 --><ellipse cx="200" cy="200" rx="46" ry="36" fill="#F7E6D2"/><!-- 코 --><ellipse cx="200" cy="186" rx="15" ry="11" fill="#6B4730"/><ellipse cx="195" cy="183" rx="4" ry="3" fill="#A07050"/><!-- 입 --><path d="M200 196 L200 208" stroke="#6B4730" stroke-width="3" stroke-linecap="round"/><path d="M200 208 Q186 220 174 210" fill="none" stroke="#6B4730" stroke-width="3" stroke-linecap="round"/><path d="M200 208 Q214 220 226 210" fill="none" stroke="#6B4730" stroke-width="3" stroke-linecap="round"/><!-- ===== 머리 위 별 안테나 (요정) ===== --><line x1="168" y1="72" x2="158" y2="42" stroke="#C4B5FD" stroke-width="4" stroke-linecap="round"/><g transform="translate(156,32)"><circle r="11" fill="url(#b-glow)"/><path d="M0,-9 l2.8,8 8,0 -6.5,5 2.5,8 -6.8,-5 -6.8,5 2.5,-8 -6.5,-5 8,0z" fill="#FCD34D" stroke="#F59E0B" stroke-width="1.5"/></g><line x1="232" y1="72" x2="242" y2="42" stroke="#C4B5FD" stroke-width="4" stroke-linecap="round"/><g transform="translate(244,32)"><circle r="9" fill="url(#b-glow)"/><path d="M0,-7 l2.2,6 6.5,0 -5,4 2,6.5 -5.7,-4 -5.7,4 2,-6.5 -5,-4 6.5,0z" fill="#FCD34D" stroke="#F59E0B" stroke-width="1.3"/></g><!-- ===== 별 지팡이 (오른손 옆) ===== --><line x1="268" y1="388" x2="318" y2="300" stroke="#A78BFA" stroke-width="8" stroke-linecap="round"/><line x1="268" y1="388" x2="318" y2="300" stroke="#DDD6FE" stroke-width="4" stroke-linecap="round" opacity="0.7"/><g transform="translate(322,292)"><circle r="20" fill="url(#b-glow)"/><path d="M0,-15 l4.6,13.5 14,0 -11,8.5 4.2,13.5 -11.8,-8.5 -11.8,8.5 4.2,-13.5 -11,-8.5 14,0z" fill="#FCD34D" stroke="#F59E0B" stroke-width="2"/></g></svg>';
+
+/* 요정 SVG 삽입 */
+function injectFairies(){
+  ['fairy-start','fairy-student','fairy-intro'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el && !el.querySelector('svg')) el.innerHTML=FAIRY_SVG;
+  });
+}
+
+/* ── 연결 상태 관리 (GitHub Pages 정적 배포) ── */
+/*
+  APP_MODE: 'demo' | 'linked'
+  EXEC_URL: 선생님이 입력한 .../exec 주소 (localStorage 또는 #c= 해시)
+  IS_STUDENT_LINK: 학생용 #c= 해시로 접속 여부 (설정 UI 숨김)
+*/
+var EXEC_URL = '';
+var APP_MODE = 'demo';
+var IS_STUDENT_LINK = false;
+
+(function initConnection(){
+  /* 1순위: #c=<exec주소> 해시 → 학생 링크 접속 */
+  var hash = window.location.hash;
+  if(hash && hash.indexOf('#c=') === 0){
+    EXEC_URL = decodeURIComponent(hash.slice(3));
+    APP_MODE = 'linked';
+    IS_STUDENT_LINK = true;
+    return;
+  }
+  /* 2순위: localStorage에 저장된 주소 */
+  var saved = localStorage.getItem('clock_fairy_exec');
+  if(saved){
+    EXEC_URL = saved;
+    APP_MODE = 'linked';
+    return;
+  }
+  /* 3순위: 데모 모드 */
+  APP_MODE = 'demo';
+})();
+
+/* STATE (fetchStudents보다 먼저 선언) */
+var G={student:'',studentNum:'',learnH:3,queue:[],idx:0,mode:'read',sm:'read',readH:null,setMins:720,ok:[],ng:[],unsolved:[],hasFailed:false,guide:true,hintCount:0,retryCount:0,solveCount:0,timeLimit:0,timeLeft:0,timerId:null,savedUnsolved:[],resultFixed:false,savedOk:[],savedNg:[],afterRetry:false};
+
+injectFairies();
+applyScale();
+(function(){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});var st=document.getElementById('s-start');if(st)st.classList.add('active');})();
+window.addEventListener('load',function(){
+  injectFairies();applyScale();
+  /* 학생 링크 접속 시 설정 패널 DOM에서 제거 */
+  if(IS_STUDENT_LINK){
+    var sp=document.getElementById('teacher-settings');
+    if(sp)sp.parentNode.removeChild(sp);
+  } else {
+    /* exec 입력란에 저장된 주소 채우기 */
+    var inp=document.getElementById('exec-input');
+    if(inp && EXEC_URL) inp.value=EXEC_URL;
+    if(EXEC_URL) showStudentLink();
+  }
+  updateConnBadge();
+  fetchStudents();
+});
+
+/* ── 단계 정의 ── */
+/* step: 0=intro,1=learn,2=practice/quiz,3=solve/result */
+/* color, progress % */
+var STEP_CFG=[
+  {color:'#6366f1',bg:'#eef2ff'},   /* 0 시작 */
+  {color:'#4f46e5',bg:'#eef2ff'},   /* 1 개념 */
+  {color:'#3b82f6',bg:'#eff6ff'},   /* 2 연습 */
+  {color:'#22c55e',bg:'#f0fdf4'}    /* 3 문제 */
+];
+
+/* screen → step 매핑 */
+var SCREEN_STEP={
+  'start':-1,'student':-1,'goal':-1,
+  'intro':0,
+  'learn':1,
+  'practice':2,'quiz-read':2,'quiz-set':2,
+  'solve':3,'result':3
+};
+
+/* ── HEADER UPDATE ── */
+function updateHeader(screenId){
+  var hdr=document.getElementById('g-header');
+  var step=SCREEN_STEP[screenId];
+
+  /* start/student: 헤더 숨김 */
+  if(step<0){hdr.classList.add('hidden-hdr');return;}
+  hdr.classList.remove('hidden-hdr');
+
+  /* 학생 이름 */
+  document.getElementById('hdr-stu').textContent=G.student||'—';
+
+  /* 단계 버튼 스타일 */
+  for(var i=0;i<=3;i++){
+    var el=document.getElementById('hs-'+i);
+    var cfg=STEP_CFG[i];
+    el.className='hdr-step';
+    if(i===step){
+      el.classList.add('active');
+      el.style.background=cfg.color;
+      el.style.color='#fff';
+    } else if(i<step){
+      el.classList.add('done');
+      el.style.background=cfg.bg;
+      el.style.color=cfg.color;
+    } else {
+      el.classList.add('inactive');
+      el.style.background='';
+      el.style.color='';
+    }
+  }
+
+  /* 진행바: 퀴즈 중에는 문제 진행률, 아니면 단계 진행 */
+  var fill=document.getElementById('hdr-fill');
+  var pct, barColor;
+  if((screenId==='quiz-read'||screenId==='quiz-set') && G.queue.length>0){
+    pct=Math.round((G.idx/G.queue.length)*100);
+    barColor=STEP_CFG[2].color;
+  } else {
+    pct=step<=0?8:step===1?33:step===2?66:100;
+    barColor=STEP_CFG[Math.max(0,step)].color;
+  }
+  fill.style.width=pct+'%';
+  fill.style.background=barColor;
+}
+
+/* ── HEADER step 버튼 클릭 ── */
+function hdrGo(step){
+  if(step===0) go('intro');
+  else if(step===1){go('learn');initLearn();}
+  else if(step===2) go('practice');
+  else if(step===3) goSolve();
+}
+function goHome(){go('intro');}
+
+/* ── SCREEN ── */
+function go(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  document.getElementById('s-'+id).classList.add('active');
+  closePopup();
+  updateHeader(id);
+  /* 퀴즈 화면에서만 가이드 버튼 표시 */
+  showGuideBtn(id==='quiz-read'||id==='quiz-set'||id==='learn');
+  /* 퀴즈 화면이 아니면 타이머 정지 + 숨김 */
+  if(id!=='quiz-read'&&id!=='quiz-set'){
+    stopTimer();
+    var box=document.getElementById('hdr-timer'); if(box)box.style.display='none';
+  }
+  /* 데모 모드: 화면 전환마다 진행 상태 스냅샷 저장 */
+  autoSaveDemoSnap(id);
+}
+
+/* ── STUDENT ── */
+
+/* 연결 상태 배지 업데이트 */
+function updateConnBadge(){
+  var b=document.getElementById('conn-badge');
+  if(!b)return;
+  if(APP_MODE==='linked'){
+    b.textContent='연결됨 — 시트에서 명단을 불러옵니다';
+    b.style.background='#dcfce7'; b.style.color='#166534';
+  } else {
+    b.textContent='데모 체험 모드 — 선생님이 구글 시트를 연결하면 실제 명단이 표시됩니다';
+    b.style.background='#fef9c3'; b.style.color='#854d0e';
+  }
+}
+
+/* 학생 명단 불러오기 */
+function fetchStudents(){
+  var sel=document.getElementById('stu-sel');
+  if(!sel)return;
+  while(sel.options.length>1)sel.remove(1);
+
+  if(APP_MODE==='linked' && EXEC_URL){
+    /* 연동 모드: GAS fetch */
+    jsonp('students', {}, function(data){
+        if(!data||!data.ok||!data.students){ console.warn('명단 로드 실패',data); loadDemoStudents(sel); return; }
+        data.students.forEach(function(s){
+          var opt=document.createElement('option');
+          opt.value=JSON.stringify(s);
+          opt.textContent=(s['번호']?s['번호']+'번 ':'')+s['이름'];
+          sel.appendChild(opt);
+        });
+        updateConnBadge();
+      });
+    return;
+  }
+  /* 데모 모드 */
+  loadDemoStudents(sel);
+}
+
+function jsonp(action, params, cb){
+  var name='__jsonp_'+Math.random().toString(36).slice(2);
+  var url=EXEC_URL+(EXEC_URL.indexOf('?')>-1?'&':'?')+'action='+encodeURIComponent(action)+'&callback='+name;
+  for(var k in (params||{})){ if(Object.prototype.hasOwnProperty.call(params,k)) url+='&'+encodeURIComponent(k)+'='+encodeURIComponent(params[k]); }
+  var sc=document.createElement('script'); var done=false;
+  function clean(){ try{delete window[name];}catch(e){window[name]=undefined;} if(sc&&sc.parentNode)sc.parentNode.removeChild(sc); }
+  window[name]=function(d){ if(done)return; done=true; try{cb(d);}catch(e){} clean(); };
+  sc.onerror=function(){ if(done)return; done=true; clean(); try{cb(null);}catch(e){} };
+  sc.src=url; document.head.appendChild(sc);
+  setTimeout(function(){ if(!done){done=true; clean();} }, 10000);
+}
+function loadDemoStudents(sel){
+  for(var i=1;i<=30;i++){
+    var opt=document.createElement('option');
+    opt.value=JSON.stringify({번호:i,이름:'학생'+i});
+    opt.textContent=i+'번 학생'+i;
+    sel.appendChild(opt);
+  }
+}
+
+function onStu(){
+  var v=document.getElementById('stu-sel').value;
+  if(!v){G.student='';G.studentNum='';document.getElementById('btn-go').classList.toggle('ready',false);return;}
+  try{var parsed=JSON.parse(v);G.student=parsed['이름']||'';G.studentNum=String(parsed['번호']||'');}catch(e){G.student=v.replace(/^\d+번\s*/,'');G.studentNum='';}
+  document.getElementById('btn-go').classList.toggle('ready',!!G.student);
+  /* 데모 모드: 이전 진행 상태 복원 안내 */
+  if(APP_MODE==='demo') restoreDemoProgress();
+}
+
+/* ── 설정 패널 UI ── */
+function toggleSettings(){
+  var body=document.getElementById('settings-body');
+  var arrow=document.getElementById('settings-arrow');
+  if(!body)return;
+  var open=(body.style.display==='none'||body.style.display==='');
+  body.style.display=open?'flex':'none';
+  if(arrow)arrow.textContent=open?'▲':'▼';
+}
+
+function connectExec(){
+  var inp=document.getElementById('exec-input');
+  if(!inp)return;
+  var url=(inp.value||'').trim();
+  if(!url||url.indexOf('script.google.com')<0){
+    alert('올바른 .../exec 주소를 입력해주세요.');return;
+  }
+  localStorage.setItem('clock_fairy_exec',url);
+  EXEC_URL=url; APP_MODE='linked';
+  showStudentLink();
+  updateConnBadge();
+  fetchStudents();
+}
+
+function disconnectExec(){
+  if(!confirm('연결을 해제하고 데모 모드로 돌아갈까요?'))return;
+  localStorage.removeItem('clock_fairy_exec');
+  EXEC_URL=''; APP_MODE='demo';
+  var inp=document.getElementById('exec-input');
+  if(inp)inp.value='';
+  var box=document.getElementById('student-link-box');
+  if(box)box.style.display='none';
+  updateConnBadge();
+  fetchStudents();
+}
+
+function showStudentLink(){
+  var box=document.getElementById('student-link-box');
+  var inp=document.getElementById('student-link-input');
+  if(!box||!inp)return;
+  var appUrl=window.location.origin+window.location.pathname;
+  inp.value=appUrl+'#c='+encodeURIComponent(EXEC_URL);
+  box.style.display='flex';
+}
+
+function copyStudentLink(){
+  var inp=document.getElementById('student-link-input');
+  if(!inp)return;
+  inp.select();
+  document.execCommand('copy');
+  showSaveToast('학생용 주소가 복사되었습니다!',true);
+}
+function goGoal(){
+  if(!G.student)return;
+  document.getElementById('goal-greet').textContent=G.student+' 학생, 오늘의 학습목표를 함께 살펴봐요!';
+  go('goal');
+}
+function goIntro(){
+  if(!G.student)return;
+  document.getElementById('greet-lbl').textContent=G.student+' 학생, 반가워요!';
+  go('intro');
+}
+
+/* ── LEARN ── */
+function initLearn(){
+  /* 다음 단계 버튼 초기화 */
+  var btn=document.getElementById('learn-next-btn');
+  if(btn){
+    btn.disabled=true;
+    btn.style.background='#e2e8f0';
+    btn.style.color='#94a3b8';
+    btn.style.cursor='not-allowed';
+    btn.style.boxShadow='none';
+    btn.style.animation='none';
+  }
+  setTimeout(function(){
+    clock(document.getElementById('lc-static'),3*60,false);
+    clock(document.getElementById('lc-inter'),G.learnH*60,false);
+    document.getElementById('lh-lbl').textContent=G.learnH+'시';
+  },20);
+}
+function lhClick(d){
+  G.learnH+=d;
+  if(G.learnH<1)G.learnH=12;
+  if(G.learnH>12)G.learnH=1;
+  document.getElementById('lh-lbl').textContent=G.learnH+'시';
+  clock(document.getElementById('lc-inter'),G.learnH*60,false);
+  /* 처음 화살표를 누르면 다음 단계 버튼 활성화 */
+  var btn=document.getElementById('learn-next-btn');
+  if(btn && btn.disabled){
+    btn.disabled=false;
+    btn.style.background='#4f46e5';
+    btn.style.color='#fff';
+    btn.style.cursor='pointer';
+    btn.style.boxShadow='0 6px 0 #3730a3';
+    btn.style.animation='pulse-btn .8s ease-in-out 2';
+  }
+}
+
+/* ── SOLVE ── */
+function goSolve(){
+  go('solve');
+  document.getElementById('sl-mode').style.display='flex';
+  document.getElementById('sl-count').style.display='none';
+}
+function setSM(m){G.sm=m;document.getElementById('sl-mode').style.display='none';document.getElementById('sl-count').style.display='flex';}
+function backSolve(){document.getElementById('sl-mode').style.display='flex';document.getElementById('sl-count').style.display='none';}
+
+/* ── TUTORIAL ── */
+var T = { type:'read', step:0 };
+
+var TUT = {
+  read: [
+    /* ── 1단계: 화살표로 숫자 바꾸기 ── */
+    {
+      icon:'🔢',
+      label:'1단계',
+      title:'▼ 버튼을 눌러 6시로 바꿔봐요!',
+      desc:'지금 숫자는 <strong>3</strong>이에요.<br>아래 <strong style="color:#7c3aed">▼ 버튼</strong>을 눌러<br>숫자를 <strong style="color:#4f46e5">6</strong>으로 바꿔봐요!',
+      visual: function(){
+        return '<div style="display:flex;align-items:center;gap:18px">'+
+          '<canvas id="tut-clock" width="170" height="210"></canvas>'+
+          '<span style="font-size:1.6rem;color:#94a3b8">→</span>'+
+          '<div style="background:#fefce8;border:3px solid #fbbf24;border-radius:20px;padding:16px 18px;display:flex;flex-direction:column;align-items:center;gap:10px;box-shadow:0 0 0 4px rgba(251,191,36,.2)">'+
+            '<span style="font-size:.85rem;font-weight:900;color:#92400e;background:#fde68a;padding:4px 12px;border-radius:999px">👇 ▼ 버튼을 눌러요!</span>'+
+            '<div style="display:flex;flex-direction:column;border-radius:16px;border:3px solid #8b5cf6;overflow:hidden;width:100px" id="tut-spin-box">'+
+              '<div style="background:#7c3aed;padding:12px 0;display:flex;justify-content:center;align-items:center;cursor:pointer;opacity:.35" id="tut-up">'+
+                '<svg width="22" height="13" viewBox="0 0 26 15" fill="none"><path d="M2 13L13 2L24 13" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+              '</div>'+
+              '<div style="background:#fff;text-align:center;font-size:2.8rem;font-weight:900;padding:16px 0;color:#7c3aed;line-height:1;font-family:inherit" id="tut-spin-num">3</div>'+
+              '<div style="background:#7c3aed;padding:12px 0;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 0 0 3px #fbbf24" id="tut-down">'+
+                '<svg width="22" height="13" viewBox="0 0 26 15" fill="none"><path d="M2 2L13 13L24 2" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+              '</div>'+
+            '</div>'+
+            '<span style="font-size:1.7rem;font-weight:900;color:#94a3b8">시</span>'+
+            '<div id="tut-step1-msg" style="font-size:1.4rem;font-weight:800;min-height:1.4em;text-align:center"></div>'+
+          '</div>'+
+        '</div>';
+      },
+      afterRender: function(){
+        clock(document.getElementById('tut-clock'), 6*60, false);
+        var n=3;
+        /* 다음 버튼 잠금 */
+        setTimeout(function(){
+          var nb=document.getElementById('tut-next');
+          if(nb){nb.disabled=true;nb.style.opacity='0.4';nb.style.cursor='not-allowed';}
+        },40);
+        function upd(){
+          document.getElementById('tut-spin-num').textContent=n;
+          var msg=document.getElementById('tut-step1-msg');
+          if(n===6){
+            document.getElementById('tut-spin-box').style.borderColor='#16a34a';
+            if(msg){msg.textContent='🎉 6이 됐어요!';msg.style.color='#16a34a';}
+            /* 자동으로 다음 단계 이동 */
+            setTimeout(function(){ tutNav(1); }, 600);
+          } else {
+            document.getElementById('tut-spin-box').style.borderColor='#8b5cf6';
+            if(msg){msg.textContent='▼ 버튼을 눌러 6으로 바꿔봐요!';msg.style.color='#7c3aed';}
+          }
+        }
+        /* ▼만 활성, ▲는 흐리게 */
+        document.getElementById('tut-up').onclick=function(){};
+        document.getElementById('tut-down').onclick=function(){
+          if(n<6){n++;} else {n=1;}
+          upd();
+        };
+      }
+    },
+    /* ── 2단계: 정답 확인 버튼 누르기 ── */
+    {
+      icon:'✅',
+      label:'2단계',
+      title:'정답 확인 버튼을 눌러봐요!',
+      desc:'숫자를 <strong style="color:#4f46e5">6</strong>으로 바꿨나요?<br>아래 <strong style="color:#7c3aed">정답 확인</strong> 버튼을 눌러봐요.<br>맞으면 다음 문제로 넘어가요!',
+      visual: function(){
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%">'+
+          '<div style="display:flex;align-items:center;gap:16px;justify-content:center">'+
+            '<div style="background:#fefce8;border:3px solid #fbbf24;border-radius:18px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px">'+
+              '<span style="font-size:1.1rem;font-weight:900;color:#92400e;background:#fde68a;padding:4px 12px;border-radius:999px">6시 완성!</span>'+
+              '<canvas id="tut-clock" width="150" height="185"></canvas>'+
+            '</div>'+
+            '<div style="display:flex;flex-direction:column;align-items:center;gap:6px">'+
+              '<div style="display:flex;flex-direction:column;border-radius:14px;border:3px solid #16a34a;overflow:hidden;width:100px">'+
+                '<div style="background:#7c3aed;padding:10px 0;display:flex;justify-content:center;align-items:center;opacity:.35">'+
+                  '<svg width="20" height="12" viewBox="0 0 26 15" fill="none"><path d="M2 13L13 2L24 13" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+                '</div>'+
+                '<div style="background:#fff;text-align:center;font-size:2.8rem;font-weight:900;padding:12px 0;color:#7c3aed;line-height:1;font-family:inherit">6</div>'+
+                '<div style="background:#7c3aed;padding:10px 0;display:flex;justify-content:center;align-items:center;opacity:.35">'+
+                  '<svg width="20" height="12" viewBox="0 0 26 15" fill="none"><path d="M2 2L13 13L24 2" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'+
+                '</div>'+
+              '</div>'+
+              '<span style="font-size:1.5rem;font-weight:900;color:#7c3aed">시</span>'+
+            '</div>'+
+          '</div>'+
+          '<div style="background:#fefce8;border:2px solid #fbbf24;border-radius:12px;padding:10px 18px;font-size:1.25rem;font-weight:900;color:#92400e;text-align:center;width:100%">'+
+            '👇 정답 확인 버튼을 눌러요!'+
+          '</div>'+
+          '<button id="tut-check-btn" style="padding:18px 0;background:#ea580c;color:#fff;font-size:1.6rem;font-weight:900;border:none;border-radius:14px;cursor:pointer;font-family:inherit;width:100%;animation:pulse-btn .8s ease-in-out 3">정답 확인 ✓</button>'+
+          '<div id="tut-result-msg" style="font-size:1.4rem;font-weight:800;min-height:1.3em;text-align:center"></div>'+
+        '</div>';
+      },
+      afterRender: function(){
+        clock(document.getElementById('tut-clock'), 6*60, false);
+        /* 다음 버튼 잠금 */
+        setTimeout(function(){
+          var nb=document.getElementById('tut-next');
+          if(nb){nb.disabled=true;nb.style.opacity='0.4';nb.style.cursor='not-allowed';}
+        },40);
+        document.getElementById('tut-check-btn').onclick=function(){
+          var msg=document.getElementById('tut-result-msg');
+          if(msg){msg.textContent='🎉 정답이에요! 시작해봐요!';msg.style.color='#16a34a';}
+          document.getElementById('tut-check-btn').style.background='#16a34a';
+          var nb=document.getElementById('tut-next');
+          if(nb){nb.disabled=false;nb.style.opacity='1';nb.style.cursor='pointer';}
+        };
+      }
+    },
+    /* ── 3단계: 가이드 켜기/끄기 ── */
+    {
+      icon:'💡',
+      label:'3단계',
+      title:'가이드 버튼을 알아봐요!',
+      desc:'오른쪽 위 <strong style="color:#4f46e5">가이드 켜기/끄기</strong> 버튼을 눌러봐요!<br>켜면 시계 위에 <strong style="color:#7c3aed">~시</strong> 힌트가 보여요.<br>자신있으면 끄고 도전해봐요!',
+      visual: function(){
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:18px;width:100%">'+
+          '<div style="background:#f8fafc;border:2px solid #e0e7ff;border-radius:18px;padding:22px 28px;display:flex;flex-direction:column;gap:16px;width:100%">'+
+            '<div style="display:flex;align-items:center;gap:14px">'+
+              '<button style="padding:10px 22px;border-radius:10px;font-weight:700;font-size:1.2rem;border:2px solid #4f46e5;background:#4f46e5;color:#fff;font-family:inherit;cursor:default">가이드 켜기</button>'+
+              '<span style="font-size:1.2rem;color:#475569;font-weight:600">→ 시계 위에 <strong style=\"color:#7c3aed\">~시</strong> 힌트가 나타나요</span>'+
+            '</div>'+
+            '<div style="display:flex;align-items:center;gap:14px">'+
+              '<button style="padding:10px 22px;border-radius:10px;font-weight:700;font-size:1.2rem;border:2px solid #e0e7ff;background:#fff;color:#4f46e5;font-family:inherit;cursor:default">가이드 끄기</button>'+
+              '<span style="font-size:1.2rem;color:#475569;font-weight:600">→ 힌트 없이 스스로 풀어봐요!</span>'+
+            '</div>'+
+          '</div>'+
+          '<div style="background:#fefce8;border:2px solid #fbbf24;border-radius:14px;padding:14px 20px;width:100%;text-align:center">'+
+            '<p style="font-size:1.2rem;font-weight:700;color:#92400e;margin:0">💡 처음엔 가이드를 켜고 연습하다가<br>익숙해지면 꺼보는 것을 추천해요!</p>'+
+          '</div>'+
+        '</div>';
+      },
+      afterRender: function(){}
+    }
+  ],
+  set: [
+    /* ── 1단계: 시계 클릭해 4시 맞추기 ── */
+    {
+      icon:'🖱️',
+      label:'1단계',
+      title:'시계를 클릭해 4시로 맞춰봐요!',
+      desc:'시계를 클릭하면<br>한 시간씩 이동해요.<br><strong style="color:#ea580c">4시</strong>가 되면 자동으로 넘어가요!',
+      visual: function(){
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:12px">'+
+          '<div style="background:#fefce8;border:3px solid #fbbf24;border-radius:22px;padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:0 0 0 4px rgba(251,191,36,.2)">'+
+            '<span style="font-size:1.4rem;font-weight:900;color:#92400e;background:#fde68a;padding:8px 20px;border-radius:999px">👇 시계를 클릭해요!</span>'+
+            '<canvas id="tut-clock" width="180" height="220" style="cursor:pointer"></canvas>'+
+          '</div>'+
+          '<div style="background:#eff6ff;border-radius:14px;padding:14px 26px;font-size:1.55rem;font-weight:800;color:#3b82f6;text-align:center" id="tut-set-lbl">현재: 12시 → 4시가 될 때까지 클릭!</div>'+
+        '</div>';
+      },
+      afterRender: function(){
+        var h=12, mins=720;
+        var c=document.getElementById('tut-clock');
+        var lbl=document.getElementById('tut-set-lbl');
+        /* 다음 버튼 잠금 */
+        setTimeout(function(){
+          var nb=document.getElementById('tut-next');
+          if(nb){nb.disabled=true;nb.style.opacity='0.4';nb.style.cursor='not-allowed';}
+        },40);
+        function onClockClick(){
+          mins=(mins+60)%720||720;
+          h=Math.floor(mins/60)||12;
+          clock(c, mins, false);
+          c.onclick=onClockClick;
+          c.style.cursor='pointer';
+          if(h===4){
+            lbl.textContent='🎉 4시 완성!';
+            lbl.style.background='#dcfce7';
+            lbl.style.color='#16a34a';
+            /* 0.6초 후 자동으로 2단계로 이동 */
+            setTimeout(function(){ tutNav(1); }, 600);
+          } else {
+            lbl.textContent='현재: '+h+'시 → 계속 클릭!';
+            lbl.style.background='#eff6ff';
+            lbl.style.color='#3b82f6';
+          }
+        }
+        clock(c, mins, false);
+        c.onclick=onClockClick;
+        c.style.cursor='pointer';
+      }
+    },
+    /* ── 2단계: 정답 확인 버튼 누르기 ── */
+    {
+      icon:'✅',
+      label:'2단계',
+      title:'정답 확인 버튼을 눌러봐요!',
+      desc:'바늘을 <strong style="color:#ea580c">4시</strong>로 맞췄어요!<br>아래 <strong style="color:#ea580c">정답 확인</strong> 버튼을<br>눌러봐요!',
+      visual: function(){
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%">'+
+          '<div style="background:#fefce8;border:3px solid #fbbf24;border-radius:18px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px">'+
+            '<span style="font-size:1.2rem;font-weight:900;color:#92400e;background:#fde68a;padding:5px 14px;border-radius:999px">4시 완성!</span>'+
+            '<canvas id="tut-clock" width="155" height="190"></canvas>'+
+          '</div>'+
+          '<div style="background:#dcfce7;border-radius:12px;padding:10px 20px;font-size:1.35rem;font-weight:800;color:#16a34a;text-align:center;width:100%">✅ 4시 완성! 이제 정답 확인!</div>'+
+          '<div style="background:#fefce8;border:2px solid #fbbf24;border-radius:10px;padding:8px 16px;font-size:1.2rem;font-weight:900;color:#92400e;text-align:center;width:100%">👇 이 버튼을 눌러요!</div>'+
+          '<button id="tut-check-btn" style="padding:12px 0;background:#ea580c;color:#fff;font-size:1.5rem;font-weight:900;border:none;border-radius:14px;cursor:pointer;font-family:inherit;width:100%;animation:pulse-btn .8s ease-in-out 3">정답 확인 ✓</button>'+
+          '<div id="tut-result-msg" style="font-size:1.2rem;font-weight:800;min-height:1em;text-align:center"></div>'+
+        '</div>';
+      },
+      afterRender: function(){
+        clock(document.getElementById('tut-clock'), 4*60, false);
+        /* 다음(시작하기) 버튼 잠금 */
+        setTimeout(function(){
+          var nb=document.getElementById('tut-next');
+          if(nb){nb.disabled=true;nb.style.opacity='0.4';nb.style.cursor='not-allowed';}
+        },40);
+        document.getElementById('tut-check-btn').onclick=function(){
+          var msg=document.getElementById('tut-result-msg');
+          if(msg){msg.textContent='🎉 정답이에요! 이제 시작해봐요!';msg.style.color='#16a34a';}
+          document.getElementById('tut-check-btn').style.background='#16a34a';
+          var nb=document.getElementById('tut-next');
+          if(nb){nb.disabled=false;nb.style.opacity='1';nb.style.cursor='pointer';}
+        };
+      }
+    },
+    /* ── 3단계: 가이드 켜기/끄기 ── */
+    {
+      icon:'💡',
+      label:'3단계',
+      title:'가이드 버튼을 알아봐요!',
+      desc:'오른쪽 위 <strong style="color:#4f46e5">가이드 켜기/끄기</strong> 버튼을 눌러봐요!<br>켜면 시계 위에 <strong style="color:#7c3aed">~시</strong> 힌트가 보여요.<br>자신있으면 끄고 도전해봐요!',
+      visual: function(){
+        return '<div style="display:flex;flex-direction:column;align-items:center;gap:18px;width:100%">'+
+          '<div style="background:#f8fafc;border:2px solid #e0e7ff;border-radius:18px;padding:22px 28px;display:flex;flex-direction:column;gap:16px;width:100%">'+
+            '<div style="display:flex;align-items:center;gap:14px">'+
+              '<button style="padding:10px 22px;border-radius:10px;font-weight:700;font-size:1.2rem;border:2px solid #4f46e5;background:#4f46e5;color:#fff;font-family:inherit;cursor:default">가이드 켜기</button>'+
+              '<span style="font-size:1.2rem;color:#475569;font-weight:600">→ 시계 위에 <strong style=\"color:#7c3aed\">~시</strong> 힌트가 나타나요</span>'+
+            '</div>'+
+            '<div style="display:flex;align-items:center;gap:14px">'+
+              '<button style="padding:10px 22px;border-radius:10px;font-weight:700;font-size:1.2rem;border:2px solid #e0e7ff;background:#fff;color:#4f46e5;font-family:inherit;cursor:default">가이드 끄기</button>'+
+              '<span style="font-size:1.2rem;color:#475569;font-weight:600">→ 힌트 없이 스스로 풀어봐요!</span>'+
+            '</div>'+
+          '</div>'+
+          '<div style="background:#fefce8;border:2px solid #fbbf24;border-radius:14px;padding:14px 20px;width:100%;text-align:center">'+
+            '<p style="font-size:1.2rem;font-weight:700;color:#92400e;margin:0">💡 처음엔 가이드를 켜고 연습하다가<br>익숙해지면 꺼보는 것을 추천해요!</p>'+
+          '</div>'+
+        '</div>';
+      },
+      afterRender: function(){}
+    }
+  ]
+}
+function startTutorial(type){
+  T.type=type; T.step=0;
+  /* 팝업 열기 (화면 전환 없이 현재 practice 화면 위에 오버레이) */
+  var p=document.getElementById('tut-popup');
+  p.style.display='flex';
+  renderTutStep();
+}
+
+function closeTutorial(){
+  document.getElementById('tut-popup').style.display='none';
+}
+
+function renderTutStep(){
+  var steps=TUT[T.type];
+  var s=steps[T.step];
+  var total=steps.length;
+
+  /* 점 표시 */
+  var dots='';
+  for(var i=0;i<total;i++) dots+='<div style="width:'+(i===T.step?'24':'10')+'px;height:10px;border-radius:999px;background:'+(i===T.step?'#4f46e5':'#e2e8f0')+';transition:all .25s"></div>';
+  document.getElementById('tut-dots').innerHTML=dots;
+
+  document.getElementById('tut-icon').textContent=s.icon;
+  document.getElementById('tut-step-label').textContent=s.label;
+  document.getElementById('tut-title').textContent=s.title;
+  document.getElementById('tut-desc').innerHTML=s.desc.replace(/\n/g,'<br>');
+  document.getElementById('tut-counter').textContent=(T.step+1)+' / '+total;
+  document.getElementById('tut-prev').style.opacity=T.step===0?'0':'1';
+  document.getElementById('tut-prev').style.pointerEvents=T.step===0?'none':'auto';
+
+  var nextBtn=document.getElementById('tut-next');
+  if(T.step===total-1){
+    nextBtn.textContent='시작하기! 🚀';
+    nextBtn.style.background=T.type==='read'?'#4f46e5':'#3b82f6';
+    nextBtn.style.padding='12px 32px';
+    /* 정답확인 전까지 잠금 — afterRender에서 해제 */
+    nextBtn.disabled=true;
+    nextBtn.style.opacity='0.4';
+    nextBtn.style.cursor='not-allowed';
+  } else {
+    nextBtn.textContent='다음 →';
+    nextBtn.style.background='#4f46e5';
+    nextBtn.style.padding='12px 28px';
+    nextBtn.disabled=false;
+    nextBtn.style.opacity='1';
+    nextBtn.style.cursor='pointer';
+  }
+
+  /* 시각 자료 */
+  document.getElementById('tut-visual').innerHTML=s.visual();
+  setTimeout(function(){ if(s.afterRender) s.afterRender(); }, 30);
+}
+
+function tutNav(dir){
+  var steps=TUT[T.type];
+  if(dir===1 && T.step===steps.length-1){
+    /* 마지막 → 팝업 닫고 연습 퀴즈 시작 */
+    closeTutorial();
+    startPracticeQuiz(T.type, 3);
+    return;
+  }
+  T.step=Math.max(0, Math.min(steps.length-1, T.step+dir));
+  renderTutStep();
+}
+
+/* ── 연습하기 퀴즈 (연습_* 시트에 기록) ── */
+function startPracticeQuiz(type,count){
+  var baseMode = (type==='set') ? 'set' : 'read';
+  G.mode = baseMode;   /* 'read' 또는 'set' → 연습 시트 */
+  G.queue=[];G.idx=0;G.ok=[];G.ng=[];G.unsolved=[];G.hasFailed=false;G.readH=null;G.setMins=720;G.guide=true;G.hintCount=0;G.retryCount=0;G.solveCount=0;G.resultFixed=false;G.savedOk=[];G.savedNg=[];G.savedUnsolved=[];G.afterRetry=false;
+  G.timeLimit=0; G.timeLeft=0;   /* 연습은 시간 제한 없음 */
+  var used=[];
+  while(G.queue.length<count){var h=Math.floor(Math.random()*12)+1;if(!used.includes(h)){used.push(h);G.queue.push(h);}}
+  if(baseMode==='read'){
+    go('quiz-read');resetSpin();
+    setTimeout(function(){clock(document.getElementById('qr-clock'),G.queue[0]*60,false);},20);
+    showGuideBtn(true);
+  } else {
+    go('quiz-set');G.setMins=720;
+    setTimeout(function(){clock(document.getElementById('qs-clock'),G.setMins,true);document.getElementById('qs-target').textContent=G.queue[0]+'시';},20);
+    showGuideBtn(true);
+  }
+  updateHeader(baseMode==='read'?'quiz-read':'quiz-set');
+  /* 타이머 숨김 (연습은 시간제한 없음) */
+  var box=document.getElementById('hdr-timer'); if(box)box.style.display='none';
+  stopTimer();
+}
+
+
+function startQ(mode,count,timeLimit){
+  /* startQ는 도전(문제풀기) 모드 전용 → mode를 solve_* 로 정규화 */
+  var baseMode = (mode==='set'||mode==='solve_set') ? 'set' : 'read';
+  G.mode = (baseMode==='read') ? 'solve_read' : 'solve_set';
+  G.queue=[];G.idx=0;G.ok=[];G.ng=[];G.unsolved=[];G.hasFailed=false;G.readH=null;G.setMins=720;G.guide=true;G.hintCount=0;G.retryCount=0;G.solveCount=0;G.resultFixed=false;G.savedOk=[];G.savedNg=[];G.savedUnsolved=[];G.afterRetry=false;
+  G.timeLimit=timeLimit||0; G.timeLeft=timeLimit||0;
+  var used=[];
+  while(G.queue.length<count){var h=Math.floor(Math.random()*12)+1;if(!used.includes(h)){used.push(h);G.queue.push(h);}}
+  if(baseMode==='read'){
+    go('quiz-read');resetSpin();
+    setTimeout(function(){clock(document.getElementById('qr-clock'),G.queue[0]*60,false);},20);
+    showGuideBtn(true);
+  } else {
+    go('quiz-set');G.setMins=720;
+    setTimeout(function(){clock(document.getElementById('qs-clock'),G.setMins,true);document.getElementById('qs-target').textContent=G.queue[0]+'시';},20);
+    showGuideBtn(true);
+  }
+  updateHeader(baseMode==='read'?'quiz-read':'quiz-set');
+  startTimer();
+}
+
+/* ── TIMER ── */
+function fmtTime(sec){var m=Math.floor(sec/60),s=sec%60;return m+':'+(s<10?'0':'')+s;}
+function startTimer(){
+  stopTimer();
+  var box=document.getElementById('hdr-timer');
+  var val=document.getElementById('timer-val');
+  if(!G.timeLimit){ if(box)box.style.display='none'; return; }
+  if(box)box.style.display='flex';
+  if(val)val.textContent=fmtTime(G.timeLeft);
+  G.timerId=setInterval(function(){
+    G.timeLeft--;
+    if(val)val.textContent=fmtTime(Math.max(0,G.timeLeft));
+    /* 10초 이하 빨갛게 */
+    if(box){
+      if(G.timeLeft<=10){box.style.background='#fee2e2';box.style.color='#dc2626';}
+      else{box.style.background='#fef3c7';box.style.color='#b45309';}
+    }
+    if(G.timeLeft<=0){
+      stopTimer();
+      timeUp();
+    }
+  },1000);
+}
+function stopTimer(){ if(G.timerId){clearInterval(G.timerId);G.timerId=null;} }
+function timeUp(){
+  /* 시간 초과: 남은 문제는 오답 처리 후 결과 */
+  closePopup();
+  /* 시간 초과: 아직 풀지 않은 문제는 '못 푼 문제'로 분리 기록 */
+  for(var i=G.idx;i<G.queue.length;i++){
+    var v=G.queue[i]+'시';
+    if(!G.ng.includes(v)&&!G.ok.includes(v)&&!G.unsolved.includes(v))G.unsolved.push(v);
+  }
+  popupSimple('ng','⏰','시간 종료!','정해진 시간이 끝났어요.<br>결과를 확인해볼까요?',
+    '<button class="pb orange" onclick="closePopup();showResult()">결과 보기</button>');
+}
+
+/* 진행바 갱신 (문제 넘길 때마다) */
+function upProg(){
+  var isRead=(G.mode==='read'||G.mode==='solve_read');
+  updateHeader(isRead?'quiz-read':'quiz-set');
+}
+
+/* ── GUIDE ── */
+function togGuide(){
+  G.guide=!G.guide;
+  var el=document.getElementById('g-btn');
+  if(el){el.textContent=G.guide?'가이드 켜기':'가이드 끄기';el.classList.toggle('on',G.guide);}
+  /* 현재 화면에 따라 시계 다시 그리기 */
+  var screenId=document.querySelector('.screen.active')&&document.querySelector('.screen.active').id;
+  if(screenId==='s-learn'){
+    clock(document.getElementById('lc-static'),3*60,false);
+    clock(document.getElementById('lc-inter'),G.learnH*60,false);
+  } else if(G.mode==='read'||G.mode==='solve_read') clock(document.getElementById('qr-clock'),G.queue[G.idx]*60,false);
+  else clock(document.getElementById('qs-clock'),G.setMins,true);
+}
+function showGuideBtn(show){
+  var el=document.getElementById('g-btn');
+  if(el){el.style.display=show?'':'none';el.textContent=G.guide?'가이드 켜기':'가이드 끄기';el.classList.toggle('on',G.guide);}
+}
+
+/* ── SPIN (READ) ── */
+function resetSpin(){
+  G.readH=null;
+  document.getElementById('h-num').textContent='?';
+  document.getElementById('h-num').classList.add('empty-n');
+  document.getElementById('h-spin').classList.add('empty');
+}
+function spinH(d){
+  if(G.readH===null)G.readH=d>0?1:12;
+  else{G.readH+=d;if(G.readH<1)G.readH=12;if(G.readH>12)G.readH=1;}
+  var el=document.getElementById('h-num');
+  el.textContent=G.readH;el.classList.remove('empty-n');
+  document.getElementById('h-spin').classList.remove('empty');
+}
+function checkRead(){
+  var target=G.queue[G.idx];
+  if(G.readH===null){popupSimple('ng','⚠️','먼저 숫자를 선택해 주세요!','','<button class="pb gray" onclick="closePopup()">확인</button>');return;}
+  if(G.readH===target){
+    if(!G.hasFailed){G.solveCount++; if(!G.ok.includes(target+'시'))G.ok.push(target+'시');}
+    else { G.retryCount++; if(!G.ng.includes(target+'시'))G.ng.push(target+'시'); }
+    /* 맞음: 정답 시계 1개 */
+    popupWithClocks('ok','🎉','훌륭해요!',
+      null, target*60,
+      '짧은 바늘 → <strong>'+target+'</strong> &nbsp; 긴 바늘 → <strong>12</strong>',
+      '<button class="pb blue" onclick="nextQ()">'+(G.idx+1>=G.queue.length?'결과 보기':'다음 문제')+'</button>');
+  } else {
+    G.hasFailed=true;if(!G.ng.includes(target+'시'))G.ng.push(target+'시');
+    popupWithClocks('ng','😅','다시 해볼까요?',
+      G.readH*60, target*60,
+      '',
+      '<button class="pb orange" onclick="closePopup();resetSpin()">다시 풀어보기</button>');
+  }
+}
+function checkSet(){
+  var target=G.queue[G.idx];
+  var m=Math.round(G.setMins)%720||720;
+  var h=Math.floor(m/60);var mn=m%60;
+  if(h===0)h=12;if(h>12)h=h%12||12;
+  if(h===target&&mn===0){
+    if(!G.hasFailed){G.solveCount++; if(!G.ok.includes(target+'시'))G.ok.push(target+'시');}
+    else { G.retryCount++; if(!G.ng.includes(target+'시'))G.ng.push(target+'시'); }
+    popupWithClocks('ok','🎉','훌륭해요!',
+      null, target*60,
+      '바늘을 정확히 맞췄어요!',
+      '<button class="pb blue" onclick="nextQ()">'+(G.idx+1>=G.queue.length?'결과 보기':'다음 문제')+'</button>');
+  } else {
+    G.hasFailed=true;if(!G.ng.includes(target+'시'))G.ng.push(target+'시');
+    popupWithClocks('ng','😅','다시 해볼까요?',
+      G.setMins, target*60,
+      '',
+      '<button class="pb orange" onclick="closePopup()">다시 맞추기</button>');
+  }
+}
+function nextQ(){
+  closePopup();G.idx++;G.hasFailed=false;
+  if(G.idx>=G.queue.length){
+    if(G.afterRetry){G.afterRetry=false;go('result');showRetryComplete();}
+    else{showResult();}
+    return;
+  }
+  upProg();
+  var isRead=(G.mode==='read'||G.mode==='solve_read');
+  if(isRead){resetSpin();clock(document.getElementById('qr-clock'),G.queue[G.idx]*60,false);}
+  else{G.setMins=720;document.getElementById('qs-target').textContent=G.queue[G.idx]+'시';clock(document.getElementById('qs-clock'),G.setMins,true);}
+}
+/* ── SAVE ── */
+function saveActivityRecord(){
+  if(!G.student)return;
+  var sheetName='';
+  if(G.mode==='read')sheetName='연습_시계읽기';
+  else if(G.mode==='set')sheetName='연습_바늘돌리기';
+  else if(G.mode==='solve_read')sheetName='문제_시계읽기';
+  else if(G.mode==='solve_set')sheetName='문제_바늘돌리기';
+  else return;
+
+  /* 데모 모드: 저장하지 않고 안내만 표시 */
+  if(APP_MODE==='demo'){
+    showSaveToast('선생님이 구글 시트를 연결하면 저장돼요', false);
+    saveDemoProgress('done');   /* 완료 상태로 로컬 저장 → 다음엔 처음부터 */
+    return;
+  }
+
+  var total=G.queue.length||1, accInt=Math.round((G.ok.length/total)*100);
+  var payload={
+    '번호':G.studentNum,'이름':G.student,
+    '타임스탬프':new Date().toLocaleString('ko-KR'),
+    '문항수':total,'정답률':accInt+'%',
+    '정답내용':G.ok.join(', '),'오답내용':G.ng.join(', '),
+    '못푼내용':G.unsolved.join(', '),
+    '그냥푼횟수':G.solveCount,'다시푼횟수':G.retryCount,
+    '시트이름':sheetName
+  };
+  var isSolve=(G.mode==='solve_read'||G.mode==='solve_set');
+  if(isSolve && G.timeLimit>0){
+    var tier={30:'⚡ 번개 시계왕',60:'🕐 황금 시계요정',120:'🗺️ 시계 탐험가',240:'🌱 꼬마 시계친구'}[G.timeLimit]||'-';
+    var limitTxt={30:'30초',60:'1분',120:'2분',240:'4분'}[G.timeLimit]||(G.timeLimit+'초');
+    payload['도전칭호']=tier;
+    payload['제한시간']=limitTxt;
+    payload['성공여부']=(G.ng.length===0&&G.unsolved.length===0?'성공 🎉':'재도전');
+  } else {
+    payload['도전칭호']='-'; payload['제한시간']='-'; payload['성공여부']='-';
+  }
+
+  /* 연동 모드: fetch POST */
+  fetch(EXEC_URL, {
+    method:'POST',
+    mode:'no-cors',
+    body:JSON.stringify({action:'saveRecord', data:payload})
+  }).catch(function(){});
+  showSaveToast('✅ 기록 저장 완료 ('+sheetName+')', true);
+  saveDemoProgress('done');
+}
+
+/* 저장 결과 토스트 (3초 후 사라짐) */
+function showSaveToast(msg, ok){
+  var t=document.getElementById('save-toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='save-toast';
+    t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9999;padding:14px 28px;border-radius:14px;font-family:inherit;font-size:1.1rem;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:opacity .3s';
+    document.body.appendChild(t);
+  }
+  t.style.background=ok?'#dcfce7':'#fef9c3';
+  t.style.color=ok?'#166534':'#854d0e';
+  t.textContent=msg;
+  t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(function(){t.style.opacity='0';},3000);
+}
+
+/* ── 데모 모드: localStorage 진행 상태 저장/복원 ── */
+var DEMO_KEY_PREFIX = 'clock_fairy_progress:';
+
+function demoKey(){
+  return DEMO_KEY_PREFIX + (G.studentNum || G.student || 'unknown');
+}
+
+/* 현재 진행 상태 스냅샷 저장 */
+function saveDemoProgress(status){
+  if(APP_MODE !== 'demo') return;
+  if(!G.student) return;
+  var snap = {
+    status: status || 'active',  /* 'active' | 'done' */
+    mode: G.mode,
+    screen: document.querySelector('.screen.active') ? document.querySelector('.screen.active').id.replace('s-','') : '',
+    idx: G.idx,
+    ok: G.ok,
+    ng: G.ng,
+    unsolved: G.unsolved,
+    queue: G.queue,
+    timeLimit: G.timeLimit,
+    savedAt: Date.now()
+  };
+  try { localStorage.setItem(demoKey(), JSON.stringify(snap)); } catch(e){}
+}
+
+/* 복원 — 학생 선택 직후 호출 */
+function restoreDemoProgress(){
+  if(APP_MODE !== 'demo') return;
+  try {
+    var raw = localStorage.getItem(demoKey());
+    if(!raw) return;
+    var snap = JSON.parse(raw);
+
+    /* 완료 상태면 로컬 저장 삭제 → 다음엔 처음부터 */
+    if(snap.status === 'done'){
+      localStorage.removeItem(demoKey());
+      return;
+    }
+
+    /* 진행 중 → 이어하기 안내 토스트 */
+    if(snap.status === 'active' && snap.screen && snap.screen !== 'start' && snap.screen !== 'student'){
+      showSaveToast('이전에 하던 활동이 있어요. 이름을 선택하면 이어서 할 수 있어요!', true);
+    }
+  } catch(e){}
+}
+
+/* 화면 전환 시마다 진행 상태 자동 저장 (go() 함수에서 호출) */
+function autoSaveDemoSnap(screenId){
+  if(APP_MODE !== 'demo') return;
+  if(!G.student) return;
+  if(screenId === 'start' || screenId === 'student') return;
+  saveDemoProgress('active');
+}
+function showResult(){
+  stopTimer();
+  var box=document.getElementById('hdr-timer'); if(box)box.style.display='none';
+  var name=G.student||'학생';
+  var modeLabel={
+    'read':'연습: 시계 읽기','set':'연습: 바늘 돌리기',
+    'solve_read':'문제: 시계 읽기','solve_set':'문제: 바늘 돌리기'
+  }[G.mode]||G.mode;
+  var today=new Date();
+  var dateStr=today.getFullYear()+'년 '+(today.getMonth()+1)+'월 '+today.getDate()+'일';
+
+  document.getElementById('res-title').textContent='['+name+'] 학습 결과 보고서';
+  document.getElementById('res-student-name').textContent=name;
+  document.getElementById('res-mode-label').textContent=modeLabel;
+  document.getElementById('res-date').textContent=dateStr;
+
+  /* 시간 도전 칭호 표시 */
+  var titleBox=document.getElementById('res-badge');
+  if(titleBox){
+    if(G.timeLimit>0){
+      var tier={30:{n:'번개 시계왕',e:'⚡',c:'#f59e0b'},60:{n:'황금 시계요정',e:'🕐',c:'#ea580c'},120:{n:'시계 탐험가',e:'🗺️',c:'#3b82f6'},240:{n:'꼬마 시계친구',e:'🌱',c:'#22c55e'}}[G.timeLimit];
+      var allCorrect=(G.ng.length===0 && G.unsolved.length===0);
+      if(tier){
+        if(allCorrect){
+          titleBox.style.display='flex';
+          titleBox.innerHTML='<span style="font-size:2rem">'+tier.e+'</span>'+
+            '<span style="font-size:1.4rem;font-weight:900;color:'+tier.c+'">「'+tier.n+'」 칭호 획득!</span>';
+          titleBox.style.background='#fffbeb';
+          titleBox.style.borderColor=tier.c;
+        } else {
+          titleBox.style.display='flex';
+          titleBox.innerHTML='<span style="font-size:1.6rem">💪</span>'+
+            '<span style="font-size:1.3rem;font-weight:800;color:#64748b">'+tier.e+' '+tier.n+' 도전 — 조금만 더!</span>';
+          titleBox.style.background='#f8fafc';
+          titleBox.style.borderColor='#e2e8f0';
+        }
+      } else { titleBox.style.display='none'; }
+    } else { titleBox.style.display='none'; }
+  }
+
+  /* 최초 결과만 보고서에 반영 (다시풀기 후엔 갱신 안 함) */
+  if(!G.resultFixed){
+    G.resultFixed=true;
+    G.savedOk=G.ok.slice(); G.savedNg=G.ng.slice(); G.savedUnsolved=G.unsolved.slice();
+    document.getElementById('res-ok').innerHTML=G.savedOk.length
+      ?G.savedOk.map(function(s){return '<span class="tag tg">'+s+'</span>';}).join('')
+      :'<span class="tnone">없음</span>';
+    document.getElementById('res-ng').innerHTML=G.savedNg.length
+      ?G.savedNg.map(function(s){return '<span class="tag to">'+s+'</span>';}).join('')
+      :'<span class="tnone">없음</span>';
+    /* 못 푼 문제 카드: 도전 모드에서 시간초과로 못 푼 문제가 있을 때만 표시 */
+    var unsolvedCard=document.getElementById('res-unsolved-card');
+    var cardsRow=document.getElementById('res-cards-row');
+    if(G.savedUnsolved.length>0){
+      if(unsolvedCard) unsolvedCard.style.display='block';
+      if(cardsRow) cardsRow.style.gridTemplateColumns='1fr 1fr 1fr';
+      document.getElementById('res-unsolved').innerHTML=
+        G.savedUnsolved.map(function(s){return '<span class="tag" style="background:#e2e8f0;color:#475569">'+s+'</span>';}).join('');
+    } else {
+      if(unsolvedCard) unsolvedCard.style.display='none';
+      if(cardsRow) cardsRow.style.gridTemplateColumns='1fr 1fr';
+    }
+    /* 통계는 숨겨진 span에만 기록 */
+    document.getElementById('res-solve-count').textContent=G.solveCount;
+    document.getElementById('res-retry-count').textContent=G.retryCount;
+    document.getElementById('res-hint-count').textContent=G.hintCount;
+    saveActivityRecord();
+  }
+
+  /* 버튼 영역: 다 맞췄고 못 푼 것도 없으면 단계선택, 아니면 다시풀기 버튼 */
+  var hasNg=(G.savedNg&&G.savedNg.length>0);
+  var hasUnsolved=(G.savedUnsolved&&G.savedUnsolved.length>0);
+  if(hasNg||hasUnsolved){
+    document.getElementById('res-btns-default').style.display='grid';
+    document.getElementById('res-btns-after').style.display='none';
+  } else {
+    /* 전부 정답 → 단계 선택 바로 표시 */
+    document.getElementById('res-btns-default').style.display='none';
+    document.getElementById('res-btns-after').style.display='flex';
+    var msgEl=document.getElementById('res-after-msg');
+    if(msgEl) msgEl.textContent='🎉 모두 맞췄어요! 다음 단계를 선택해봐요';
+  }
+
+  go('result');
+}
+
+function startMissedRetry(){
+  /* 틀린 문제 + 시간초과로 못 푼 문제 모두 다시 풀기 */
+  var allMissed=[];
+  if(G.savedNg) allMissed=allMissed.concat(G.savedNg);
+  if(G.savedUnsolved) allMissed=allMissed.concat(G.savedUnsolved);
+  if(!allMissed.length)return;
+  var missedH=allMissed.map(function(s){return parseInt(s);}).filter(Boolean);
+  G.queue=missedH; G.idx=0; G.hasFailed=false; G.readH=null; G.setMins=720;
+  G.ok=[]; G.ng=[]; G.unsolved=[]; G.solveCount=0; G.retryCount=0; G.hintCount=0;
+  /* 다시풀기 완료 후 콜백 설정 */
+  G.afterRetry=true;
+  /* 다시풀기는 시간 제한 없이 진행 */
+  G.timeLimit=0; G.timeLeft=0;
+  stopTimer();
+  var box=document.getElementById('hdr-timer'); if(box)box.style.display='none';
+  if(G.mode==='read'||G.mode==='solve_read'){
+    go('quiz-read'); resetSpin();
+    setTimeout(function(){clock(document.getElementById('qr-clock'),G.queue[0]*60,false);},20);
+  } else {
+    go('quiz-set'); G.setMins=720;
+    setTimeout(function(){clock(document.getElementById('qs-clock'),G.setMins,true);document.getElementById('qs-target').textContent=G.queue[0]+'시';},20);
+  }
+  upProg(); showGuideBtn(true);
+}
+
+function showRetryComplete(){
+  /* 다시풀기 끝난 후 결과화면에서 단계선택 버튼 표시 */
+  document.getElementById('res-btns-default').style.display='none';
+  document.getElementById('res-btns-after').style.display='flex';
+  var msgEl=document.getElementById('res-after-msg');
+  if(msgEl) msgEl.textContent='🎉 다시 풀기 완료! 다음 단계를 선택해봐요';
+}
+
+/* ── POPUP ── */
+function popupSimple(type,icon,title,body,btns){
+  document.getElementById('p-icon').textContent=icon;
+  document.getElementById('p-title').textContent=title;
+  document.getElementById('p-title').className='popup-title '+(type==='ok'?'ok':'ng');
+  document.getElementById('p-body').innerHTML=body||'';
+  document.getElementById('p-btns').innerHTML=btns||'';
+  var pc=document.getElementById('p-clocks');
+  pc.style.display='none'; pc.innerHTML='';
+  document.getElementById('popup').classList.add('show');
+}
+
+/* wrongMins=null → 맞음(시계+바늘정보) / wrongMins 있으면 틀림(학생시계+힌트만, 정답없음) */
+function popupWithClocks(type,icon,title,wrongMins,correctMins,bodyText,btns){
+  document.getElementById('p-icon').textContent=icon;
+  document.getElementById('p-title').textContent=title;
+  document.getElementById('p-title').className='popup-title '+(type==='ok'?'ok':'ng');
+  document.getElementById('p-body').innerHTML='';
+  document.getElementById('p-btns').innerHTML=btns||'';
+
+  var pc=document.getElementById('p-clocks');
+  pc.innerHTML='';
+  var sz=260;
+
+  if(wrongMins!==null && wrongMins!==undefined){
+    var wrongH=Math.floor((Math.round(wrongMins)%720||720)/60);
+    if(wrongH===0)wrongH=12; if(wrongH>12)wrongH=wrongH%12||12;
+    var shortPos=wrongH;
+
+    pc.innerHTML=
+      /* 위: 시계 + 바늘 정보 가로 배치 */
+      '<div style="display:flex;align-items:center;gap:24px;width:100%">'+
+        '<div class="clock-wrap">'+
+          '<canvas id="p-clock-wrong" width="'+sz+'" height="'+sz+'"></canvas>'+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;gap:14px;flex:1">'+
+          '<p style="font-size:1.45rem;font-weight:800;color:#1e3a5f;background:#dbeafe;padding:12px 20px;border-radius:14px;margin:0">🔍 지금 바늘 위치</p>'+
+          '<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;gap:14px">'+
+            '<div style="display:flex;align-items:center;gap:10px;white-space:nowrap">'+
+              '<span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#10b981;flex-shrink:0"></span>'+
+              '<span style="font-size:1.4rem;color:#065f46;font-weight:800">짧은 바늘(시)</span>'+
+              '<span style="font-size:2.6rem;font-weight:900;color:#065f46;margin-left:8px">'+shortPos+'</span>'+
+            '</div>'+
+            '<div style="display:flex;align-items:center;gap:10px;white-space:nowrap">'+
+              '<span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#ef4444;flex-shrink:0"></span>'+
+              '<span style="font-size:1.4rem;color:#7f1d1d;font-weight:800">긴 바늘(분)</span>'+
+              '<span style="font-size:2.6rem;font-weight:900;color:#7f1d1d;margin-left:8px">12</span>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      /* 아래: 내가 입력한 시각 + 안내문 중앙 정렬 */
+      '<div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:10px">'+
+        '<span class="clock-lbl wrong-lbl">❌ 내가 입력한 시각 ('+wrongH+'시)</span>'+
+        '<div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:14px;padding:14px 24px;width:100%;text-align:center">'+
+          '<p style="font-size:1.35rem;font-weight:700;color:#7c2d12;margin:0;line-height:1.6">'+
+            '짧은 바늘이 가리키는 숫자를 다시 확인해볼까요?'+
+          '</p>'+
+        '</div>'+
+      '</div>';
+
+    pc.style.display='flex';
+    pc.style.gap='16px';
+    pc.style.flexDirection='column';
+    pc.style.alignItems='center';
+    setTimeout(function(){
+      var cw=document.getElementById('p-clock-wrong');
+      if(cw) clockPopup(cw, wrongMins, false, '#ef4444');
+    },30);
+
+  } else {
+    var cH=Math.floor((Math.round(correctMins)%720||720)/60);
+    if(cH===0)cH=12; if(cH>12)cH=cH%12||12;
+
+    pc.innerHTML=
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:16px;width:100%">'+
+        /* 위: 시계 + 바늘정보 가로 배치 */
+        '<div style="display:flex;align-items:center;gap:28px;width:100%;justify-content:center">'+
+          '<div class="clock-wrap">'+
+            '<canvas id="p-clock-correct" width="'+sz+'" height="'+sz+'"></canvas>'+
+          '</div>'+
+          '<div style="display:flex;flex-direction:column;justify-content:center;gap:14px;align-self:center;min-width:220px">'+
+            '<p style="font-size:1.45rem;font-weight:800;color:#1e3a5f;background:#dbeafe;padding:12px 20px;border-radius:14px;margin:0">📌 바늘 위치 확인!</p>'+
+            '<div style="background:#f0fdf4;border:2px solid #86efac;border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;gap:14px">'+
+              '<div style="display:flex;align-items:center;gap:10px;white-space:nowrap">'+
+                '<span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#10b981;flex-shrink:0"></span>'+
+                '<span style="font-size:1.4rem;color:#065f46;font-weight:800">짧은 바늘(시)</span>'+
+                '<span style="font-size:2.6rem;font-weight:900;color:#065f46;margin-left:8px">'+cH+'</span>'+
+              '</div>'+
+              '<div style="display:flex;align-items:center;gap:10px;white-space:nowrap">'+
+                '<span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#ef4444;flex-shrink:0"></span>'+
+                '<span style="font-size:1.4rem;color:#7f1d1d;font-weight:800">긴 바늘(분)</span>'+
+                '<span style="font-size:2.6rem;font-weight:900;color:#7f1d1d;margin-left:8px">12</span>'+
+              '</div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        /* 아래: 정답 레이블 팝업 전체 중앙 */
+        '<span class="clock-lbl correct-lbl" style="font-size:1.7rem;padding:12px 36px">✅ 정답 ('+cH+'시)</span>'+
+      '</div>';
+
+    pc.style.display='flex';
+    pc.style.flexDirection='column';
+    pc.style.alignItems='center';
+    setTimeout(function(){
+      var cc=document.getElementById('p-clock-correct');
+      if(cc) clockPopup(cc, correctMins, false, '#10b981');
+    },30);
+  }
+
+  document.getElementById('popup').classList.add('show');
+}
+
+function closePopup(){document.getElementById('popup').classList.remove('show');}
+
+/* 팝업 전용 시계 그리기 (테두리 색 파라미터 추가) */
+function clockPopup(canvas,totalMins,interactive,rimColor){
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var W=canvas.width,H=canvas.height,R=W/2-5,cx=W/2,cy=H/2;
+  ctx.clearRect(0,0,W,H);
+  ctx.beginPath();ctx.arc(cx,cy,R,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
+  ctx.lineWidth=5;ctx.strokeStyle=rimColor||'#6366f1';ctx.stroke();
+  for(var i=0;i<60;i++){
+    var a=i*6*Math.PI/180,outer=R-2,inner=i%5===0?R-10:R-5;
+    ctx.beginPath();ctx.moveTo(cx+outer*Math.sin(a),cy-outer*Math.cos(a));ctx.lineTo(cx+inner*Math.sin(a),cy-inner*Math.cos(a));
+    ctx.strokeStyle=i%5===0?'#94a3b8':'#e2e8f0';ctx.lineWidth=i%5===0?2:1.2;ctx.stroke();
+  }
+  var nr=R*0.70;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#334155';
+  ctx.font='bold '+Math.round(R*0.18)+'px Jua,sans-serif';
+  for(var n=1;n<=12;n++){var na=(n*30-90)*Math.PI/180;ctx.fillText(n,cx+nr*Math.cos(na),cy+nr*Math.sin(na));}
+  var mins=(totalMins%720)||720,hAng=(mins/720)*2*Math.PI,mAng=((mins%60)/60)*2*Math.PI;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(mAng);ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(0,-R*0.80);ctx.lineWidth=R*0.052;ctx.lineCap='round';ctx.strokeStyle='#ef4444';ctx.stroke();ctx.restore();
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(hAng);ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(0,-R*0.54);ctx.lineWidth=R*0.078;ctx.lineCap='round';ctx.strokeStyle='#10b981';ctx.stroke();ctx.restore();
+  ctx.beginPath();ctx.arc(cx,cy,R*0.065,0,2*Math.PI);ctx.fillStyle='#1e293b';ctx.fill();
+}
+
+/* ── CLOCK ── */
+function clock(canvas,totalMins,interactive){
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var W=canvas.width,H=canvas.height;
+  var R=W/2-6;
+  /* 가이드 버블이 위에 들어갈 공간(pad)을 남기고 시계를 아래로 배치 */
+  var pad=Math.round(R*0.34);
+  var cx=W/2, cy=Math.min(pad+R+6, H/2+pad/2);
+  ctx.clearRect(0,0,W,H);
+  ctx.beginPath();ctx.arc(cx,cy,R,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
+  ctx.lineWidth=5;ctx.strokeStyle='#6366f1';ctx.stroke();
+  for(var i=0;i<60;i++){
+    var a=i*6*Math.PI/180,outer=R-2,inner=i%5===0?R-11:R-6;
+    ctx.beginPath();ctx.moveTo(cx+outer*Math.sin(a),cy-outer*Math.cos(a));ctx.lineTo(cx+inner*Math.sin(a),cy-inner*Math.cos(a));
+    ctx.strokeStyle=i%5===0?'#94a3b8':'#e2e8f0';ctx.lineWidth=i%5===0?2.5:1.5;ctx.stroke();
+  }
+  var nr=R*0.72;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#334155';
+  ctx.font='bold '+Math.round(R*0.175)+'px Jua,sans-serif';
+  for(var n=1;n<=12;n++){var na=(n*30-90)*Math.PI/180;ctx.fillText(n,cx+nr*Math.cos(na),cy+nr*Math.sin(na));}
+  if(G.guide){
+    var bw=Math.round(R*0.52), bh=Math.round(R*0.28);
+    var bx=cx, by=cy-R-bh/2-6;
+    ctx.fillStyle='#4f46e5';
+    ctx.beginPath();ctx.roundRect(bx-bw/2,by-bh/2,bw,bh,8);ctx.fill();
+    ctx.beginPath();ctx.moveTo(bx-9,by+bh/2);ctx.lineTo(bx+9,by+bh/2);ctx.lineTo(bx,by+bh/2+9);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.font='bold '+Math.round(R*0.21)+'px Jua,sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('~시',bx,by);
+  }
+  var mins=(totalMins%720)||720,hAng=(mins/720)*2*Math.PI,mAng=((mins%60)/60)*2*Math.PI;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(mAng);ctx.beginPath();ctx.moveTo(0,5);ctx.lineTo(0,-R*0.80);ctx.lineWidth=R*0.05;ctx.lineCap='round';ctx.strokeStyle='#10b981';ctx.stroke();ctx.restore();
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(hAng);ctx.beginPath();ctx.moveTo(0,5);ctx.lineTo(0,-R*0.54);ctx.lineWidth=R*0.075;ctx.lineCap='round';ctx.strokeStyle='#ef4444';ctx.stroke();ctx.restore();
+  ctx.beginPath();ctx.arc(cx,cy,R*0.06,0,2*Math.PI);ctx.fillStyle='#1e293b';ctx.fill();
+  if(interactive){
+    canvas.style.cursor='pointer';
+    canvas.onclick=function(){G.setMins=(G.setMins+60)%720||720;clock(canvas,G.setMins,true);};
+  } else {canvas.style.cursor='default';canvas.onclick=null;}
+}
+</script>
+<script>
+/* 체험 모드 안내 배너 (전 앱 일관) */
+(function(){
+  function isDemo(){ try{ if(/[#&]c=/.test(location.hash||'')) return false; for(var j=0;j<localStorage.length;j++){ var k=localStorage.key(j)||''; if(/exec|gasurl|serverurl|sheet_api|gas_exec|appserverurl|endpoint/i.test(k) && localStorage.getItem(k)) return false; } return true; }catch(e){ return true; } }
+  function show(){ if(document.getElementById('__demoBar'))return; if(!isDemo())return; var bar=document.createElement('div'); bar.id='__demoBar'; bar.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:2147483000;background:#1f2937;color:#fff;font-size:13px;line-height:1.45;padding:9px 38px calc(9px + env(safe-area-inset-bottom)) 14px;text-align:center;font-family:sans-serif;box-shadow:0 -2px 10px rgba(0,0,0,0.25);'; bar.innerHTML='체험 모드예요 · 활동 기록은 이 기기에만 저장돼요(이어하기 가능). 선생님이 구글 시트를 연결하면 시트에 저장됩니다.'; var x=document.createElement('button'); x.type='button'; x.setAttribute('aria-label','닫기'); x.textContent='✕'; x.style.cssText='position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#fff;font-size:16px;line-height:1;cursor:pointer;padding:6px;'; x.onclick=function(){ try{bar.remove();}catch(e){bar.style.display='none';} }; bar.appendChild(x); document.body.appendChild(bar); }
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', show); } else { show(); }
+})();
+</script>
+</body>
+</html>
